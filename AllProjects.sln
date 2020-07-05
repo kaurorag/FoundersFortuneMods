@@ -30,6 +30,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FFModPreBuild", "Utilities\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlannedParenthood", "Mods\PlannedParenthood\PlannedParenthood.csproj", "{82CEE379-2BD5-44C9-818B-5B7CBE4D977B}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnreleasedMods", "UnreleasedMods", "{975D5B58-38AA-4E14-9975-3ACC357CF97D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test unreleased", "FoundersFortuneModsUnreleased\Test unreleased\Test unreleased.csproj", "{46197C15-42E1-4399-B137-F73B0AC9F962}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -64,6 +68,10 @@ Global
 		{82CEE379-2BD5-44C9-818B-5B7CBE4D977B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{82CEE379-2BD5-44C9-818B-5B7CBE4D977B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{82CEE379-2BD5-44C9-818B-5B7CBE4D977B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{46197C15-42E1-4399-B137-F73B0AC9F962}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{46197C15-42E1-4399-B137-F73B0AC9F962}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{46197C15-42E1-4399-B137-F73B0AC9F962}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{46197C15-42E1-4399-B137-F73B0AC9F962}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -76,6 +84,7 @@ Global
 		{8F33BC73-51C7-4FEF-9A54-4717A2D3D77B} = {D78317EB-A189-44B9-96E4-2E5476E802CB}
 		{B27F8C5F-D9DB-48AD-90FA-A59C33DF502E} = {D78317EB-A189-44B9-96E4-2E5476E802CB}
 		{82CEE379-2BD5-44C9-818B-5B7CBE4D977B} = {234CC9CC-B7D0-44EC-A800-E3EE86622FBD}
+		{46197C15-42E1-4399-B137-F73B0AC9F962} = {975D5B58-38AA-4E14-9975-3ACC357CF97D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {48873AB6-628C-4DA8-88D3-4783B22006DC}
