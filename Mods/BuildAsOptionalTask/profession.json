@@ -1,0 +1,8 @@
+﻿{
+  "specializations": {
+    "build": {
+      "professionNames": [ "forester", "craftsman", "miner", "scholar", "farmer", "doctor" ],
+      "requiredSkill": ""
+    }
+  }
+}

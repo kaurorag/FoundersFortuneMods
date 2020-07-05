@@ -1,0 +1,59 @@
+﻿{
+  "witchy_UIImprovements_satisfactionTooltip_Title": {
+    "english": "Satisfaction"
+  },
+  "witchy_UIImprovements_satisfactionTooltip_Desc": {
+    "english": "{0} has {1} Satisfaction points to spend."
+  },
+  "witchy_UIImprovements_MigrationTimer": {
+    "english": "New colonist will arrive in {0}"
+  },
+  "witchy_UIImprovements_Soil_Watered": {
+    "english": "Watered: {0}/2"
+  },
+  "witchy_UIImprovements_Soil_Stage": {
+    "english": "Growth stage: {0}"
+  },
+  "witchy_UIImprovements_Soil_Stage_NoPlant": {
+    "english": "Need to sow"
+  },
+  "witchy_UIImprovements_Soil_Stage_Growing": {
+    "english": "Growing"
+  },
+  "witchy_UIImprovements_Soil_Stage_Grown": {
+    "english": "Ready for harvest"
+  },
+  "witchy_UIImprovements_Soil_Stage_Dead": {
+    "english": "Dead"
+  },
+  "witchy_UIImprovements_Soil_Growth": {
+    "english": "Growth: {0} {1}%"
+  },
+  "witchy_UIImprovements_Resource_Depleted": {
+    "english": "Depleted"
+  },
+  "witchy_UIImprovements_Resource_ReplenishTime": {
+    "english": "Ready in {0:00}:{1:00}"
+  },
+  "witchy_UIImprovements_Resource_Rounds": {
+    "english": "Remaining rounds: {0}"
+  },
+  "witchy_UIImprovements_Resource_ResPerRound": {
+    "english": "Nb resources per round: {0}"
+  },
+  "witchy_UIImprovements_Resource_RemainingRes": {
+    "english": "Nb resources remaining: {0}"
+  },
+  "witchy_UIImprovements_Enemy_Faction": {
+    "english": "Faction name: {0}"
+  },
+  "witchy_UIImprovements_GrowingSpot_Phases": {
+    "english": "Phase: {0}/{1}"
+  },
+  "witchy_UIImprovements_GrowingSpot_NextPhase": {
+    "english": "Time until next phase: {0:00}:{1:00}"
+  },
+  "witchy_UIImprovements_GrowingSpot_NextCare": {
+    "english": "Time until next care: {0:00}:{1:00}"
+  }
+}

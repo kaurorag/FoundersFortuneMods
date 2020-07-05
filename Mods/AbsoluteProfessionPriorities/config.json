@@ -1,0 +1,38 @@
+﻿{
+  "name": "AbsoluteProfessionPriorities",
+  "version": "2.0.5",
+  "author": "Witchy",
+  "website": "",
+  "description": "
+[h1]Description[/h1]
+Colonist will always do tasks according to their profession priorities (number of stars). If two professions have the same priority, they have equal chances to be selected.
+Ever since the last update (13.0.09), tasks are no longer done in order of profession priorities.
+Instead, there's a bit of randomization in the logic.
+For those of you who prefer to always have 3 stars task be done before 2 stars tasks and so on, this mod is for you!
+
+[h1]NEW FEATURE![/h1]
+From version 2.0 and onwards, you can now order each specialization (Sub task of a profession).
+This means that, for example, if you want a Miner to focus on Iron first, move the 'Mine Iron' specialization to the top!
+
+Farmers will now focus on the resource you have the less of when tending fields or cooking.
+For example, if you have a capacity for raw food of 100 and have 50 tomatoes but no potatoes, they'll harvest and sow the potatoes first!
+
+This mod completely rewrites the mechanics of the game when getting work interactions.
+This means that mods which add specializations must patch the methods of this mod in order to work.
+Check out the code for my BuildAsProfessionTask in order to know how!
+
+[h1]How does it work?[/h1]
+If you'd like to see how I implemented my mods, feel free to browse the source code available on my [url=https://github.com/WitchyMods/FoundersFortuneMods]Github[/url]
+
+[h1]Want to donate?[/h1]
+My mods will always be free!
+However, if you'd like to support my modding efforts, [b][url=https://www.buymeacoffee.com/WitchyMods]Buy Me A Coffee[/url][/b].
+
+[h1]Contact[/h1]
+If you'd like to report a bug or suggest an idea or need help with modding, join the official Founders' Fortune [url=https://discord.gg/GkhSZeT]Discord Channel[/url]",
+  "compatibleVersions": [
+    "Alpha 13.0.09", 
+	"Alpha 13.0.10",
+	"Alpha 13.0.11"	
+  ]
+}

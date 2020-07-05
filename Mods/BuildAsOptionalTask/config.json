@@ -1,0 +1,36 @@
+﻿{
+  "name": "BuildAsProfessionTask",
+  "version": "1.1.1",
+  "author": "Witchy",
+  "website": "",
+  "description": "
+[h1]Description[/h1]
+Adds 'Build' as a task under each profession. 
+If turned off, your colonist will not build structures or furniture automatically (but they can still be ordered to).
+
+[b]Note[/b]: Now that it is a task under each professions, if a colonist does not have a profession, they will not automatically build anything. This can be confusing when starting a new game.
+
+[b]Note2[/b]: Due to the mechanics of the job priorities since the latest version, if your 3 stars profession does not have 'Build' enabled but your 2 stars profession does, your colonist may 
+still end up building even if they have available tasks to do for their 3 stars job.
+
+[h1]Changelog[/h1]
+[list]
+[*][b]1.1.0[/b]: Compatibility with AbsoluteProfessionPriorities mod 2.0
+[*][b]1.0.1[/b]: Increased priority of the Build task so colonist will Build first before doing something else.
+[/list]
+
+[h1]How does it work?[/h1]
+If you'd like to see how I implemented my mods, feel free to browse the source code available on my [url=https://github.com/WitchyMods/FoundersFortuneMods]Github[/url]
+
+[h1]Want to donate?[/h1]
+My mods will always be free!
+However, if you'd like to support my modding efforts, [b][url=https://www.buymeacoffee.com/WitchyMods]Buy Me A Coffee[/url][/b].
+
+[h1]Contact[/h1]
+If you'd like to report a bug or suggest an idea or need help with modding, join the official Founders' Fortune [url=https://discord.gg/GkhSZeT]Discord Channel[/url]",
+  "compatibleVersions": [
+    "Alpha 13.0.09",
+    "Alpha 13.0.10",
+	"Alpha 13.0.11"
+  ]
+}

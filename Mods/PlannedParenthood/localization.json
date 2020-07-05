@@ -1,0 +1,20 @@
+﻿{
+  "witchy_PlannedParenthood_BirthdayPanelTitle": {
+    "english": "Honey, let's have a child!"
+  },
+  "witchy_PlannedParenthood_BirthdayPanelText": {
+    "english": "{0} and {1} are discussing about having a child. This is an important decision to make as children don't raise themselves and could put a lot of pressure on the colony. However, they are quite eager and are even discussing baby names!  If they had a new child, what would their name be?"
+  },
+  "witchy_PlannedParenthood_BirthdayPanelAcceptText": {
+    "english": "These would be perfect!"
+  },
+  "witchy_PlannedParenthood_BirthdayPanelRejectText": {
+    "english": "The colony cannot afford it"
+  },
+  "witchy_PlannedParenthood_BirthdayPanelBoyLabel": {
+    "english": "If it's a boy"
+  },
+  "witchy_PlannedParenthood_BirthdayPanelGirlLabel": {
+    "english": "If it's a girl"
+  }
+}
