@@ -9,6 +9,7 @@ using UnityEngine.UI;
 
 namespace WitchyMods.PlannedParenthood
 {
+    [Serializable]
     public class PlannedParenthoodMod : Mod
     {
         public static bool InAddChild = false;

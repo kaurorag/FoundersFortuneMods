@@ -1,14 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿#if !MODKIT
 using HarmonyLib;
-using UnityEngine.UI;
-using UnityEngine;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Xml;
+using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 [Flags]
 public enum UnityObjectLogType : int
@@ -24,27 +25,102 @@ public enum UnityObjectLogType : int
     ALL = LogChildren | LogChildrenComponents | LogComponents | Fields | Properties | InheritedFieldsProperties
 }
 
-public static class UnityUtils
+public static class DebugLogger
 {
-    public static void LogUnityObject(GameObject obj, UnityObjectLogType logType = UnityObjectLogType.ALL)
-    {
-        XmlDocument doc = new XmlDocument();
-        LogUnityObjectProps(obj, doc, doc, logType, new List<object>());
+    private const String PATH = @"C:\temp\logs.txt";
 
-        doc.Save(@"C:\temp\gameobject.xml");
+    static DebugLogger()
+    {
+#if DEBUG
+        if (File.Exists(PATH)) File.Delete(PATH);
+#endif
     }
 
-    private static void LogUnityObjectProps(GameObject obj, XmlNode parentNode, XmlDocument doc, UnityObjectLogType logType, List<System.Object> loggedObjs, bool parentIsContainer = false)
+    public static void Log(String name, object obj)
     {
-        if (loggedObjs.Contains(obj))
+        Log($"{name}: {obj}");
+    }
+
+
+    public static void LogObj(String name, object obj, BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static)
+    {
+#if DEBUG
+        using (FileStream fs = new FileStream(PATH, FileMode.Append, FileAccess.Write))
+        using (StreamWriter writer = new StreamWriter(fs))
         {
-            parentNode.InnerText = "Referenced" + obj.ToString();
-            return;
+            Log(name, obj, writer, "", flags);
         }
+#endif
+    }
 
-        loggedObjs.Add(obj);
+    private static void Log(String name, object obj, StreamWriter writer, String indent, BindingFlags flags)
+    {
+        writer.WriteLine($"{name}({obj?.GetType()}): {obj}");
 
-        XmlNode objNode = parentIsContainer ? parentNode : parentNode.AppendChild(doc.CreateElement("GameObject"));
+        if (obj != null)
+        {
+            Type type = obj.GetType();
+
+            foreach (var member in (type.GetFields(flags)
+                .Select(x => new { Name = x.Name, Type = x.FieldType, Value = (x.IsStatic ? x.GetValue(null) : x.GetValue(obj)) }))
+                .Union(
+                type.GetProperties(flags)
+                .Select(x => new { Name = x.Name, Type = x.PropertyType, Value = (x.GetMethod.IsStatic ? x.GetValue(null) : x.GetValue(obj)) }))
+                .OrderBy(x => x.Name))
+            {
+                writer.WriteLine($"\t{member.Name}({member.Type}): {member.Value}");
+            }
+        }
+    }
+
+    public static void Log(Exception ex)
+    {
+#if DEBUG
+        Log(ex.ToString());
+#endif
+    }
+
+    public static void Log(String text)
+    {
+#if DEBUG
+        using (FileStream fs = new FileStream(PATH, FileMode.Append, FileAccess.Write))
+        using (StreamWriter writer = new StreamWriter(fs))
+            writer.WriteLine(text);
+#endif
+    }
+
+    public static void LogStackTrace()
+    {
+#if DEBUG
+        Log(new StackTrace(true).ToString());
+#endif
+    }
+
+    public static void LogUnityStrackTrace()
+    {
+#if DEBUG
+        Log(StackTraceUtility.ExtractStackTrace());
+#endif
+    }
+}
+
+public static class UnityUtils
+{
+    private static Type[] IgnoredTypes = new Type[] { typeof(Component), typeof(Behaviour), typeof(Transform), typeof(CanvasRenderer), typeof(UIBehaviour), typeof(MonoBehaviour) };
+
+    public static void LogUnityObject(GameObject obj, UnityObjectLogType logType = UnityObjectLogType.ALL)
+    {
+#if DEBUG
+        XmlDocument doc = new XmlDocument();
+        LogUnityObjectProps(obj, doc, doc, logType);
+
+        doc.Save(@"C:\temp\gameobject.xml");
+#endif
+    }
+
+    private static void LogUnityObjectProps(GameObject obj, XmlNode parentNode, XmlDocument doc, UnityObjectLogType logType)
+    {
+        XmlNode objNode = parentNode.AppendChild(doc.CreateElement("GameObject"));
 
         objNode.Attributes.Append(doc.CreateAttribute("name")).Value = obj.name;
         objNode.Attributes.Append(doc.CreateAttribute("active")).Value = obj.activeInHierarchy.ToString();
@@ -56,7 +132,7 @@ public static class UnityUtils
 
             foreach (Component c in obj.GetComponents<Component>())
             {
-                LogTypedComponent(c, c.GetType(), cNode, doc, loggedObjs, logType);
+                LogTypedComponent(c, c.GetType(), cNode, doc, logType);
             }
 
         }
@@ -69,7 +145,7 @@ public static class UnityUtils
             for (int i = 0; i < obj.transform.childCount; i++)
             {
                 GameObject child = obj.transform.GetChild(i).gameObject;
-                LogUnityObjectProps(child, cNode, doc, logType, loggedObjs);
+                LogUnityObjectProps(child, cNode, doc, logType);
             }
 
         }
@@ -78,69 +154,47 @@ public static class UnityUtils
     public static void LogComponent<T>(T component, UnityObjectLogType logType = UnityObjectLogType.None)
     where T : Component
     {
+#if DEBUG
         XmlDocument doc = new XmlDocument();
 
-        LogTypedComponent(component, component.GetType(), doc, doc, new List<object>(), logType);
+        LogTypedComponent(component, component.GetType(), doc, doc, logType);
 
         doc.Save(@"C:\temp\component.xml");
+#endif
     }
 
-    private static void LogTypedComponent(Component component, Type type, XmlNode parentNode, XmlDocument doc, List<System.Object> loggedObjs, UnityObjectLogType logType, bool parentIsContainer = false, bool isFirstPass = true)
+    private static void LogTypedComponent(Component component, Type type, XmlNode parentNode, XmlDocument doc, UnityObjectLogType logType, bool isFirst =true)
     {
-        if (type.In<Type>(typeof(Transform), typeof(CanvasRenderer), typeof(UIBehaviour), typeof(MonoBehaviour), typeof(Graphics)))
-            return;
+        if (IgnoredTypes.Contains(type)) return;
 
-        XmlNode cNode = parentIsContainer ? parentNode : parentNode.AppendChild(doc.CreateElement(type.Name));
+        XmlNode cNode = parentNode.AppendChild(doc.CreateElement(type.Name));
 
-        if (type.BaseType != typeof(Component) && typeof(Component).IsAssignableFrom(type.BaseType))
+        if (isFirst && typeof(Behaviour).IsAssignableFrom(type))
+            cNode.Attributes.Append(doc.CreateAttribute("Enabled")).Value = ((Behaviour)component).enabled.ToString();
+
+        LogTypedComponent(component, type.BaseType, cNode, doc, logType, false);
+
+        BindingFlags flags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly | BindingFlags.NonPublic;
+
+
+        foreach (var member in (type.GetFields(flags).Where(x => !x.IsInitOnly && (x.IsPublic || x.GetCustomAttribute<SerializeField>() != null))
+                .Select(x => new { x.Name, Type = x.FieldType, Value = (x.IsStatic ? x.GetValue(null) : x.GetValue(component)) }))
+                .Union(
+                type.GetProperties(flags).Where(x => x.SetMethod != null && x.SetMethod.IsPublic && x.GetIndexParameters().Length == 0)
+                .Select(x => new { x.Name, Type = x.PropertyType, Value = (x.GetMethod.IsStatic ? x.GetValue(null) : x.GetValue(component)) }))
+                .OrderBy(x => x.Name))
         {
-            LogTypedComponent(component, type.BaseType, cNode, doc, loggedObjs, logType, false);
-        }
+            XmlNode childNode = cNode.AppendChild(doc.CreateElement(member.Name));
 
-        if (type == typeof(RectTransform))
-        {
-            RectTransform rect = (RectTransform)component;
-            cNode.Attributes.Append(doc.CreateAttribute("rect")).Value = rect.rect.ToString();
-
-            cNode.AppendChild(doc.CreateElement("anchoredPosition")).InnerText = rect.anchoredPosition.ToString();
-            cNode.AppendChild(doc.CreateElement("sizeDelta")).InnerText = rect.sizeDelta.ToString();
-            cNode.AppendChild(doc.CreateElement("anchorMin")).InnerText = rect.anchorMin.ToString();
-            cNode.AppendChild(doc.CreateElement("anchorMax")).InnerText = rect.anchorMax.ToString();
-            cNode.AppendChild(doc.CreateElement("pivot")).InnerText = rect.pivot.ToString();
-        }
-        else
-        {
-            if (type.BaseType == typeof(Graphic))
+            if (member.Value != null && typeof(Component).IsAssignableFrom(member.Type) && ((Component)member.Value).gameObject.transform == null)
             {
-                cNode.AppendChild(doc.CreateElement("color")).InnerText = ((Graphic)component).color.ToString();
+                childNode.Attributes.Append(doc.CreateAttribute("IsPrefabTemplate")).Value = "True";
+                LogUnityObjectProps((GameObject)((Component)member.Value).gameObject, childNode, doc, logType);
             }
-
-            BindingFlags flags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly;
-
-            Dictionary<String, bool> fieldsPropsName = type.GetFields(flags)
-                    .Select(x => new Tuple<String, bool>(x.Name, true))
-                    .Union(type.GetProperties(flags)
-                    .Select(x => new Tuple<String, bool>(x.Name, false))).ToDictionary(x => x.Item1, x => x.Item2);
-
-
-            foreach (var namePair in fieldsPropsName.OrderBy(x => x.Key))
-            {
-                System.Object value = null;
-
-                if (namePair.Value)
-                    value = type.GetField(namePair.Key, flags).GetValue(component);
-                else
-                    value = type.GetProperty(namePair.Key, flags).GetValue(component);
-
-                XmlNode childNode = cNode.AppendChild(doc.CreateElement(namePair.Key));
-
-                if (value == null)
-                    childNode.InnerText = "null";
-                else if (value.GetType() == typeof(ColorBlock) || value.GetType() == typeof(SpriteState))
-                    LogFieldsAndPropertiesForValueType(value, childNode, doc);               
-                else
-                    childNode.InnerText = value == null ? "null" : value.ToString();
-            }
+            else if (member.Value != null && (member.Type == typeof(ColorBlock) || member.Type == typeof(SpriteState)))
+                LogFieldsAndPropertiesForValueType(member.Value, childNode, doc);
+            else
+                childNode.InnerText = $"{member.Value}";
         }
     }
 
@@ -182,27 +236,4 @@ public static class UnityUtils
     }
 }
 
-public class LogIndenter : IDisposable
-{
-    private String _Log = String.Empty;
-
-    public static bool InError = false;
-
-    public LogIndenter(String log)
-    {
-        _Log = log;
-
-        FileLog.Log(_Log);
-        FileLog.Log("{");
-        FileLog.indentLevel++;
-    }
-
-    public void Dispose()
-    {
-        if (!InError)
-        {
-            FileLog.indentLevel--;
-            FileLog.Log("}");
-        }
-    }
-}
+#endif
