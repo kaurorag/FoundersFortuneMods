@@ -70,7 +70,8 @@ namespace WitchyMods.UIImprovements
         {
             this.Human = human;
 
-            UpdateInteraction(this.Human.GetCurrentInteractionInfo());
+            if (this.ToolTip != null)
+                UpdateInteraction(this.Human.GetCurrentInteractionInfo());
         }
 
         private void Update()
