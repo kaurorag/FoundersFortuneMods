@@ -33,7 +33,7 @@ namespace WitchyMods.AbsoluteProfessionPriorities
             List<long> humanIds = humanManager.GetHumans().Where(x => x.faction.GetFactionType() == FactionType.Colony).Select(x => x.GetID()).ToList();
 
             //Remove all of the saved IDs that are not in the colony anymore
-            foreach (var removedId in specializationPriorities.Keys.Where(x => !humanIds.Contains(x)))
+            foreach (var removedId in specializationPriorities.Keys.Where(x => !humanIds.Contains(x)).ToArray())
             {
                 specializationPriorities.Remove(removedId);
             }
