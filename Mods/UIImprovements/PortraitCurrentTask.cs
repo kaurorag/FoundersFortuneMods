@@ -11,28 +11,25 @@ namespace WitchyMods.UIImprovements
 {
     public class PortraitCurrentTask : MonoBehaviour
     {
-        public HumanAI Human = null;
+        private HumanAI Human = null;
 
         public TooltipHoverable ToolTip = null;
 
         private InteractionInfo _LastInteraction = null;
 
-        private static Sprite smallBorders = null;
-
         private const float SIZEDIFF = -13f;
         private const float FRAMEOFFSET = 9;
 
-        private Image backgroundImage = null;
-        private Image iconImage = null;
-        private Image frameImage = null;
+        public Image backgroundImage = null;
+        public Image iconImage = null;
+        public Image frameImage = null;
 
         private static Color emptyColor = new Color(0, 0, 0, 0);
         private static Color backgroundColor = new Color(0.286f, 0.259f, 0.212f, 1);
 
-        private void Awake()
+        public void Init()
         {
-            if (smallBorders == null)
-                smallBorders = Resources.FindObjectsOfTypeAll<Sprite>().First(x => x.name == "smallBorder");
+            Sprite smallBorders = Resources.FindObjectsOfTypeAll<Sprite>().First(x => x.name == "smallBorder");
 
             backgroundImage = this.GetComponent<Image>();
             backgroundImage.color = backgroundColor;
@@ -64,6 +61,8 @@ namespace WitchyMods.UIImprovements
             this.ToolTip = this.GetComponent<TooltipHoverable>();
 
             this.GetComponent<Button>().onClick.AddListener(new UnityEngine.Events.UnityAction(ButtonClicked));
+
+            UpdateInteraction(null);
         }
 
         public void SetHuman(HumanAI human)

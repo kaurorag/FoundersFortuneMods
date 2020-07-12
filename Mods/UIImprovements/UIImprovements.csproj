@@ -86,6 +86,7 @@
     <Compile Include="FurnitureStatusPanelPatch.cs" />
     <Compile Include="PortraitCurrentTask.cs" />
     <Compile Include="SatisfactionPointsText.cs" />
+    <Compile Include="TeamPanelPatch.cs" />
     <Compile Include="WorldScriptsPatch.cs" />
     <Compile Include="PortraitPanelPatch.cs" />
     <Compile Include="UIImprovementsMod.cs" />
