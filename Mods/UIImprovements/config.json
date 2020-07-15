@@ -1,6 +1,6 @@
 ﻿{
   "name": "UIImprovements",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "author": "Witchy",
   "website": "",
   "description": "
@@ -27,6 +27,7 @@ If you have an idea to improve the UI, let me know and I'll do my best to implem
 
 [h1]Changelog[/h1]
 [list]
+[*][b]1.0.5[/b] Fixed bug where new equipment would not display correctly in the equipment overview
 [*][b]1.0.4[/b] Fixed bug where the current task icon would appear under the satisfaction point icon
 [*][b]1.0.3[/b] Fixed bug where new colonists' portraits would not display upon accepting migrants
 [*][b]1.0.2[/b] Added the current task in the portrait panel

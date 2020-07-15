@@ -30,6 +30,15 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'ModKit|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\ModKit\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="0Harmony">
       <HintPath>E:\Harmony.2.0.1.0\Release\net472\0Harmony.dll</HintPath>
@@ -81,7 +90,6 @@
       <Link>UnityUtils.cs</Link>
     </Compile>
     <Compile Include="EquipmentButton.cs" />
-    <Compile Include="EquipmentOverviewInfos.cs" />
     <Compile Include="EquipmentPatch.cs" />
     <Compile Include="FurnitureStatusPanelPatch.cs" />
     <Compile Include="PortraitCurrentTask.cs" />
@@ -99,8 +107,11 @@
     <None Include="localization.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="WitchyModsUIImprovementsBundle.ffasset">
+    <None Include="UIImprovements.ffasset">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="WitchyModsUIImprovementsBundle.ffasset">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <ItemGroup>

@@ -17,16 +17,10 @@ namespace WitchyMods.UIImprovements
         public static void SetButtonInteractable_Postfix(EquipmentDetailPanel __instance, bool interactable)
         {
             EquipmentButton eButton = __instance.button.GetComponent<EquipmentButton>();
+            if (eButton == null) eButton = __instance.gameObject.AddComponent<EquipmentButton>();
+
             eButton.InitButton(__instance, __instance.equipmentName, interactable);
             eButton.UpdateUI();
-        }
-
-        [HarmonyPostfix]
-        [HarmonyPatch("SetEquipment")]
-        public static void SetEquipment_Postfix(EquipmentDetailPanel __instance, string equipmentName)
-        {
-            __instance.button.gameObject.AddComponent<EquipmentButton>();
-
         }
     }
 
@@ -37,7 +31,7 @@ namespace WitchyMods.UIImprovements
         [HarmonyPostfix]
         public static void Start_Postfix(EquipmentOverview __instance)
         {
-            EquipmentOverviewInfos.Instance.EquipmentOverview = __instance;
+            UIImprovementsMod.Instance.EquipmentOverview = __instance;
         }
     }
 }

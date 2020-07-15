@@ -12,6 +12,15 @@ namespace WitchyMods.UIImprovements
     [Serializable()]
     public class UIImprovementsMod : Mod
     {
+        [NonSerialized]
+        public Furniture SelectedFurniture = null;
+
+        [NonSerialized]
+        public EquipmentOverview EquipmentOverview = null;
+
+        [NonSerialized]
+        public static UIImprovementsMod Instance = null;
+
         public override void Load()
         {
             Harmony harmony = new Harmony("UIImprovements");
@@ -20,9 +29,7 @@ namespace WitchyMods.UIImprovements
 
         public override void Start()
         {
-            var infos = WorldScripts.Instance.GetComponent<EquipmentOverviewInfos>();
-            if (infos == null)
-                WorldScripts.Instance.gameObject.AddComponent<EquipmentOverviewInfos>();
+            Instance = this;
         }
 
         public override void Update()

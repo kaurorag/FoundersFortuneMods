@@ -14,7 +14,7 @@ namespace WitchyMods.UIImprovements
     {
         public static void Postfix(FurnitureStatusPanel __instance, Furniture furniture)
         {
-            EquipmentOverviewInfos.Instance.SelectedFurniture = furniture;
+            UIImprovementsMod.Instance.SelectedFurniture = furniture;
 
             if (furniture != null)
             {
