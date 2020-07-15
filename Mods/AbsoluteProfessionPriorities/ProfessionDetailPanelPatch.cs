@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿#if !MODKIT
 using HarmonyLib;
+using System.Linq;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace WitchyMods.AbsoluteProfessionPriorities
 {
@@ -22,23 +18,20 @@ namespace WitchyMods.AbsoluteProfessionPriorities
         [HarmonyPatch("Init")]
         public static void InitPrefix(ProfessionDetailPanel __instance, ProfessionType type)
         {
-            //Checks if we already initialized the Specialization Panel.  If so, do nothing
-            SpecializationPanel p = __instance.GetComponentInChildren<SpecializationPanel>(true);
-            if (p != null) return;
-
             //We don't add this panel for Soldier or NoJob
             if (type != ProfessionType.Soldier && type != ProfessionType.NoJob)
             {
+                //Checks if we already initialized the Specialization Panel.  If so, do nothing
+                SpecializationPanel p = __instance.GetComponentInChildren<SpecializationPanel>(true);
+                if (p != null) return;
+
                 //Get the parent of the original panel
                 GameObject parent = __instance.specializationTogglePanel.transform.parent.gameObject;
 
-                //Create our own panel using the original elements as templates
-                GameObject newSpecPanel = SpecializationPanel.Create(parent, __instance, 
-                    __instance.priorityHigherButton, 
-                    __instance.priorityLowerButton,
-                    __instance.specializationTogglePanel.templateToggle,
-                    type,
-                    (from x in ModHandler.mods.GetProfessionSpecializations(type) select x).ToList());
+                //Create our own panel 
+                GameObject newSpecPanel = GameObject.Instantiate(ModHandler.mods.gameObjects["SpecializationPanelModded"], parent.transform);
+                p = newSpecPanel.GetComponent<SpecializationPanel>();
+                p.Init(type, ModHandler.mods.GetProfessionSpecializations(type).ToList());
 
                 //For the collapse button to work, we need to add our panel to the accordion
                 //We also remove the original panel from it
@@ -69,3 +62,4 @@ namespace WitchyMods.AbsoluteProfessionPriorities
         }
     }
 }
+#endif

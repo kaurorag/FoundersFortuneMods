@@ -12,4 +12,10 @@
   <PropertyGroup>
     <ProjectView>ProjectFiles</ProjectView>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'ModKit|AnyCPU'">
+    <StartProgram>C:\Program Files %28x86%29\Steam\steamapps\common\Founders Fortune\Founders Fortune.exe</StartProgram>
+    <StartURL>steam://rungameid/1104330</StartURL>
+    <StartArguments>-steam -allowdebug -dev -novid -game "C:\Program Files %28x86%29\Steam\steamapps\sourcemods\AbsoluteProfessionPriorities"</StartArguments>
+    <StartAction>Program</StartAction>
+  </PropertyGroup>
 </Project>

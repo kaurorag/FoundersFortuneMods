@@ -30,7 +30,7 @@ namespace WitchyMods.AbsoluteProfessionPriorities
 
             //Get all of the IDs of the current colonists
             HumanManager humanManager = WorldScripts.Instance.humanManager;
-            List<long> humanIds = humanManager.GetHumans().Where(x => x.faction.GetFactionType() == FactionType.Colony).Select(x => x.GetID()).ToList();
+            List<long> humanIds = humanManager.GetHumans().Where(x => x.faction.GetFactionType() == FactionType.Colony && x.humanType == HumanType.Colonist).Select(x => x.GetID()).ToList();
 
             //Remove all of the saved IDs that are not in the colony anymore
             foreach (var removedId in specializationPriorities.Keys.Where(x => !humanIds.Contains(x)).ToArray())
