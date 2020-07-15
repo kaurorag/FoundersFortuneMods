@@ -1,6 +1,6 @@
 ﻿{
   "name": "AbsoluteProfessionPriorities",
-  "version": "2.0.5",
+  "version": "2.0.6",
   "author": "Witchy",
   "website": "",
   "description": "
@@ -21,6 +21,10 @@ This mod completely rewrites the mechanics of the game when getting work interac
 This means that mods which add specializations must patch the methods of this mod in order to work.
 Check out the code for my BuildAsProfessionTask in order to know how!
 
+[h1]Changelog[/h1]
+[list]
+[*][b]2.0.6[/b]: Fixed a display issue with the specialization list.
+[/list]
 [h1]How does it work?[/h1]
 If you'd like to see how I implemented my mods, feel free to browse the source code available on my [url=https://github.com/WitchyMods/FoundersFortuneMods]Github[/url]
 
