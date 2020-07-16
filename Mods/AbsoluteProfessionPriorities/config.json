@@ -1,6 +1,6 @@
 ﻿{
   "name": "AbsoluteProfessionPriorities",
-  "version": "2.0.6",
+  "version": "2.0.7",
   "author": "Witchy",
   "website": "",
   "description": "
@@ -23,6 +23,7 @@ Check out the code for my BuildAsProfessionTask in order to know how!
 
 [h1]Changelog[/h1]
 [list]
+[*][b]2.0.7[/b]: Fixed issue where unchecking specializations would have no effect.
 [*][b]2.0.6[/b]: Fixed a display issue with the specialization list.
 [/list]
 

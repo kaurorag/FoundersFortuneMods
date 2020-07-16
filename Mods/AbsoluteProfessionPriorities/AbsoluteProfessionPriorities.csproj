@@ -79,6 +79,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\..\UnityUtils.cs">
+      <Link>UnityUtils.cs</Link>
+    </Compile>
     <Compile Include="AbsoluteProfessionPrioritiesMod.cs" />
     <Compile Include="ProfessionDetailPanelPatch.cs" />
     <Compile Include="ProfessionManagerPatch.cs" />
