@@ -5,46 +5,49 @@ using System.Text;
 using System.Threading.Tasks;
 using HarmonyLib;
 
-namespace WitchyMods.AbsoluteProfessionPriorities
-{
+namespace WitchyMods.AbsoluteProfessionPriorities {
     /// <summary>
     /// Completetly rewrites the GetInteractions method of the Profession class
     /// </summary>
     [HarmonyPatch(typeof(Profession), "GetInteractions")]
-    public static class ProfessionPatch
-    {
+    public static class ProfessionPatch {
         /// <summary>
         /// Completetly rewrites the GetInteractions method of the Profession class
         /// </summary>
-        public static bool Prefix(Profession __instance, HumanAI human, List<InteractionRestricted> list)
-        {
+        public static bool Prefix(Profession __instance, HumanAI human, List<InteractionRestricted> list) {
             //If the profession isn't active or the human isn't a colonist, do nothing
             if (__instance.priority <= 0 || human.faction.GetFactionType() != FactionType.Colony)
                 return false;
 
             //Get the instance of our mod
-            AbsoluteProfessionPrioritiesMod mod = ModHandler.mods.scriptMods.OfType<AbsoluteProfessionPrioritiesMod>().First();
+            AbsoluteProfessionPrioritiesMod mod = AbsoluteProfessionPrioritiesMod.Instance;
 
             //Init the human in case it's new
             mod.InitHuman(human.GetID());
 
             //Get all the specializations for this human for this profession
-            List<String> specs = new List<string>(mod.specializationPriorities[human.GetID()][__instance.type]);
+            List<String> specs = null;
+
+            if(mod.specializationPriorities[human.GetID()].ContainsKey(__instance.type))
+                specs = new List<string>(mod.specializationPriorities[human.GetID()][__instance.type]);
 
             //Reverse the order so that the higher the priority, the higher its index
-            specs.Reverse();
+            if (specs != null && specs.Count > 1)
+                specs.Reverse();
 
             int basePriority = __instance.priority * 10000;
 
             //Call a different method depending on the profession type
-            switch (__instance.type)
-            {
+            switch (__instance.type) {
+                case ProfessionType.NoJob:
+                case ProfessionType.Soldier: return false;
                 case ProfessionType.Farmer: GetFarmerInteractions(__instance, specs, list, basePriority); break;
                 case ProfessionType.Forester: GetForesterInteractions(__instance, specs, list, basePriority); break;
                 case ProfessionType.Miner: GetMinerInteractions(__instance, specs, list, basePriority); break;
                 case ProfessionType.Craftsman: GetCraftsmanInteractions(__instance, specs, list, basePriority); break;
                 case ProfessionType.Doctor: GetDoctorInteractions(__instance, specs, list, basePriority); break;
                 case ProfessionType.Scholar: GetScholarInteractions(__instance, specs, list, basePriority); break;
+                case ProfessionType.Builder: GetBuilderInteractions(__instance, specs, list, basePriority); break;
                 default:
                     throw new NotImplementedException("The profession type is unknown to this mod and probably new.  " +
                         "This mod is thus incompatible with the current version of the game.  Please disable it.");
@@ -57,16 +60,13 @@ namespace WitchyMods.AbsoluteProfessionPriorities
         private static String[] CookedFood = new string[] { "bakedApple", "bakedPotato", "bakedTomato", "pumpkinStew", "potatoSoup", "fruitSalad", "bread", "strawberryCake", "appleStrudel" };
         private static String[] Meds = new string[] { "healingPotion", "medicine" };
 
-        private static void GetFarmerInteractions(Profession p, List<String> specs, List<InteractionRestricted> list, int basePriority)
-        {
+        private static void GetFarmerInteractions(Profession p, List<String> specs, List<InteractionRestricted> list, int basePriority) {
             int specPriority = basePriority;
 
-            for (int i = 0; i < specs.Count; i++)
-            {
+            for (int i = 0; i < specs.Count; i++) {
                 if (!p.HasSpecialization(specs[i])) continue;
 
-                switch (specs[i])
-                {
+                switch (specs[i]) {
                     case "tendToFields": GetTendToFieldsInteractions(p, list, i, specPriority); break;
                     case "cook": GetCookInteractions(p, list, i, specPriority); break;
                     case "harvestCotton":
@@ -87,6 +87,13 @@ namespace WitchyMods.AbsoluteProfessionPriorities
                         },
                         specPriority)); break;
 
+                    case "careForAnimals":
+                        list.Add(new InteractionRestricted(Interaction.Tame, specPriority));
+                        list.Add(new InteractionRestricted(Interaction.Shear, specPriority + 1));
+                        list.Add(new InteractionRestricted(Interaction.Milk, specPriority + 2));
+                        list.Add(new InteractionRestricted(Interaction.Butcher, new InteractionRestrictionAutoButcher(), specPriority + 3));
+                        break;
+
                     default:
                         GetOtherInteractions(p, specs[i], i, list, specPriority); break;
                 }
@@ -95,8 +102,7 @@ namespace WitchyMods.AbsoluteProfessionPriorities
             }
         }
 
-        private static void GetCookInteractions(Profession p, List<InteractionRestricted> list, int i, int specPriority)
-        {
+        private static void GetCookInteractions(Profession p, List<InteractionRestricted> list, int i, int specPriority) {
             //Get all of the cookable resources
             List<Resource> cookables = CookedFood.Select(x => GameState.GetResourceByString(x)).ToList();
 
@@ -110,8 +116,7 @@ namespace WitchyMods.AbsoluteProfessionPriorities
 
             //The original mod creates one interaction for all products but we create one interaction per product
             //So that we can order them
-            for (int r = 0; r < CookedFood.Length; r++)
-            {
+            for (int r = 0; r < CookedFood.Length; r++) {
                 list.Add(new InteractionRestricted(Interaction.Produce,
                     new List<InteractionRestriction>()
                     {
@@ -122,8 +127,7 @@ namespace WitchyMods.AbsoluteProfessionPriorities
             }
         }
 
-        private static void GetTendToFieldsInteractions(Profession p, List<InteractionRestricted> list, int i, int specPriority)
-        {
+        private static void GetTendToFieldsInteractions(Profession p, List<InteractionRestricted> list, int i, int specPriority) {
             //Build a dictionary of ratios (NbOwned vs Capacity) so that we order the actions
             //By what is most needed.  i.e. if we have lots of tomatoes but no potatoes, we'll harvest potatoes first
             Dictionary<Resource, double> ratios = FieldsResources.ToDictionary(x => x, x => GetResourceRatio(x));
@@ -147,8 +151,7 @@ namespace WitchyMods.AbsoluteProfessionPriorities
 
             //If low on food, the healing plants and wheat will had the lowest priority
             //Since they're not edible raw foods
-            if (lowOnFood)
-            {
+            if (lowOnFood) {
                 sortedFieldRes.Remove(Resource.HealingPlantCultivated);
                 sortedFieldRes.Remove(Resource.Wheat);
                 sortedFieldRes.Insert(0, Resource.HealingPlantCultivated);
@@ -159,8 +162,7 @@ namespace WitchyMods.AbsoluteProfessionPriorities
             //So that we can order them.  The gather resource has a tiny bonus so we always harvest before sowing
             bool sowFirst = new Random().Next(0, 2) == 1;
 
-            for (int r = 0; r < sortedFieldRes.Count; r++)
-            {
+            for (int r = 0; r < sortedFieldRes.Count; r++) {
                 InteractionRestrictionResource rr = new InteractionRestrictionResource(sortedFieldRes[r]);
                 InteractionRestrictionModule soilR = new InteractionRestrictionModule(typeof(SoilModule), true);
 
@@ -186,16 +188,13 @@ namespace WitchyMods.AbsoluteProfessionPriorities
                 specPriority + 200));
         }
 
-        private static void GetForesterInteractions(Profession p, List<String> specs, List<InteractionRestricted> list, int basePriority)
-        {
+        private static void GetForesterInteractions(Profession p, List<String> specs, List<InteractionRestricted> list, int basePriority) {
             int specPriority = basePriority;
 
-            for (int i = 0; i < specs.Count; i++)
-            {
+            for (int i = 0; i < specs.Count; i++) {
                 if (!p.HasSpecialization(specs[i])) continue;
 
-                switch (specs[i])
-                {
+                switch (specs[i]) {
                     case "chopTrees":
                         list.Add(new InteractionRestricted(Interaction.GatherResource,
                             new List<InteractionRestriction>()
@@ -222,6 +221,15 @@ namespace WitchyMods.AbsoluteProfessionPriorities
                             specPriority));
                         break;
 
+                    case "clearStumps":
+                        list.Add(new InteractionRestricted(Interaction.ClearStumps, 
+                            new List<InteractionRestriction>() 
+                            {
+                                new InteractionRestrictionResource(Resource.Wood),
+                                new InteractionRestrictionDesignation(Designation.CutTree)
+                            }, specPriority));
+                        break;
+
                     default:
                         GetOtherInteractions(p, specs[i], i, list, specPriority); break;
                 }
@@ -230,16 +238,13 @@ namespace WitchyMods.AbsoluteProfessionPriorities
             }
         }
 
-        private static void GetMinerInteractions(Profession p, List<String> specs, List<InteractionRestricted> list, int basePriority)
-        {
+        private static void GetMinerInteractions(Profession p, List<String> specs, List<InteractionRestricted> list, int basePriority) {
             int specPriority = basePriority;
 
-            for (int i = 0; i < specs.Count; i++)
-            {
+            for (int i = 0; i < specs.Count; i++) {
                 if (!p.HasSpecialization(specs[i])) continue;
 
-                switch (specs[i])
-                {
+                switch (specs[i]) {
                     case "mineStone":
                         list.Add(new InteractionRestricted(Interaction.GatherResource,
                             new List<InteractionRestriction>()
@@ -278,20 +283,18 @@ namespace WitchyMods.AbsoluteProfessionPriorities
             }
         }
 
-        private static void GetCraftsmanInteractions(Profession p, List<String> specs, List<InteractionRestricted> list, int basePriority)
-        {
+        private static void GetCraftsmanInteractions(Profession p, List<String> specs, List<InteractionRestricted> list, int basePriority) {
             int specPriority = basePriority;
 
-            for (int i = 0; i < specs.Count; i++)
-            {
+            for (int i = 0; i < specs.Count; i++) {
                 if (!p.HasSpecialization(specs[i])) continue;
 
-                switch (specs[i])
-                {
+                switch (specs[i]) {
                     case "carpenting":
                     case "tailoring":
                     case "masonry":
                     case "forging":
+                    case "weaving":
                         list.Add(new InteractionRestricted(Interaction.Produce,
                         new List<InteractionRestriction>()
                         {
@@ -309,22 +312,18 @@ namespace WitchyMods.AbsoluteProfessionPriorities
             }
         }
 
-        private static void GetDoctorInteractions(Profession p, List<String> specs, List<InteractionRestricted> list, int basePriority)
-        {
+        private static void GetDoctorInteractions(Profession p, List<String> specs, List<InteractionRestricted> list, int basePriority) {
             int specPriority = basePriority;
 
-            for (int i = 0; i < specs.Count; i++)
-            {
+            for (int i = 0; i < specs.Count; i++) {
                 if (!p.HasSpecialization(specs[i])) continue;
 
-                switch (specs[i])
-                {
+                switch (specs[i]) {
                     case "produceMedicine":
                         List<String> orderedMeds = new List<string>(Meds);
                         orderedMeds.Sort((x, y) => GetResourceRatio(GameState.GetResourceByString(y)).CompareTo(GetResourceRatio(GameState.GetResourceByString(x))));
 
-                        for (int r = 0; r < orderedMeds.Count; r++)
-                        {
+                        for (int r = 0; r < orderedMeds.Count; r++) {
                             list.Add(new InteractionRestricted(Interaction.Produce,
                             new List<InteractionRestriction>()
                             {
@@ -359,16 +358,13 @@ namespace WitchyMods.AbsoluteProfessionPriorities
             }
         }
 
-        private static void GetScholarInteractions(Profession p, List<String> specs, List<InteractionRestricted> list, int basePriority)
-        {
+        private static void GetScholarInteractions(Profession p, List<String> specs, List<InteractionRestricted> list, int basePriority) {
             int specPriority = basePriority;
 
-            for (int i = 0; i < specs.Count; i++)
-            {
+            for (int i = 0; i < specs.Count; i++) {
                 if (!p.HasSpecialization(specs[i])) continue;
 
-                switch (specs[i])
-                {
+                switch (specs[i]) {
                     case "performResearch":
                         list.Add(new InteractionRestricted(Interaction.Produce,
                             new InteractionRestrictionProfession(ProfessionType.Scholar),
@@ -388,8 +384,15 @@ namespace WitchyMods.AbsoluteProfessionPriorities
             }
         }
 
-        private static void GetOtherInteractions(Profession p, String spec, int index, List<InteractionRestricted> list, int specPriority)
-        {
+        private static void GetBuilderInteractions(Profession p, List<String> specs, List<InteractionRestricted> list, int basePriority) {
+            int specPriority = basePriority;
+
+            list.Add(new InteractionRestricted(Interaction.Deconstruct, specPriority));
+            list.Add(new InteractionRestricted(Interaction.Construct, specPriority));
+        }
+
+
+        private static void GetOtherInteractions(Profession p, String spec, int index, List<InteractionRestricted> list, int specPriority) {
             bool success = false;
 
             GetInteractionsForMods(p, spec, index, list, specPriority, ref success);
@@ -413,8 +416,7 @@ namespace WitchyMods.AbsoluteProfessionPriorities
         /// <param name="index">Index of the specialization</param>
         /// <param name="list">List of Interactions</param>
         /// <param name="specPriority">Priority of the interaction</param>
-        private static void GetInteractionsForMods(Profession p, String spec, int index, List<InteractionRestricted> list, int specPriority, ref bool success)
-        {
+        private static void GetInteractionsForMods(Profession p, String spec, int index, List<InteractionRestricted> list, int specPriority, ref bool success) {
         }
 
         /// <summary>
@@ -422,8 +424,7 @@ namespace WitchyMods.AbsoluteProfessionPriorities
         /// </summary>
         /// <param name="res">The resource</param>
         /// <returns></returns>
-        private static double GetResourceRatio(Resource res)
-        {
+        private static double GetResourceRatio(Resource res) {
             int nbOwned = GameState.Instance.GetResource(res);
             int nbMax = WorldScripts.Instance.furnitureFactory.GetStockpileLimit(res);
             double ratio = nbOwned * 1.0 / nbMax;

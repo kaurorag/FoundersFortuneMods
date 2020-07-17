@@ -44,12 +44,10 @@
       <HintPath>E:\Harmony.2.0.1.0\Release\net472\0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp">
-      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Founders Fortune\Founders Fortune_Data\Managed\Assembly-CSharp.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>C:\FFBuild\Founders Fortune_Data\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp-firstpass">
-      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Founders Fortune\Founders Fortune_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>C:\FFBuild\Founders Fortune_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -91,7 +89,6 @@
     </Compile>
     <Compile Include="EquipmentButton.cs" />
     <Compile Include="EquipmentPatch.cs" />
-    <Compile Include="FurnitureStatusPanelPatch.cs" />
     <Compile Include="PortraitCurrentTask.cs" />
     <Compile Include="SatisfactionPointsText.cs" />
     <Compile Include="TeamPanelPatch.cs" />

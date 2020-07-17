@@ -14,6 +14,12 @@ namespace WitchyMods.AbsoluteProfessionPriorities
         //[humanId][ProfessionType][specializations] (ordered by priority where 0=most important]
         public Dictionary<long, Dictionary<ProfessionType, List<String>>> specializationPriorities = new Dictionary<long, Dictionary<ProfessionType, List<string>>>();
 
+        [NonSerialized]
+        private static Dictionary<ProfessionType, List<String>> defaultPriorities = new Dictionary<ProfessionType, List<string>>();
+
+        [NonSerialized]
+        public static AbsoluteProfessionPrioritiesMod Instance;
+
         public override void Load()
         {
             Harmony harmony = new Harmony("AbsoluteProfessionPriorities");
@@ -22,7 +28,18 @@ namespace WitchyMods.AbsoluteProfessionPriorities
 
         public override void Start()
         {
-            //If it's null, then we either loaded a new game or a game that hadn't had the mod yet
+            Instance = this;
+
+            //Prepare the default dictionary
+            foreach (var spec in ModHandler.mods.professionSpecializations.Values) {
+                foreach (ProfessionType profession in spec.professionNames.Select(x => Enum.Parse(typeof(ProfessionType), x, true))) {
+                    if (!defaultPriorities.ContainsKey(profession))
+                        defaultPriorities.Add(profession, new List<string>());
+
+                    defaultPriorities[profession].Add(spec.name);
+                }
+            }
+                //If it's null, then we either loaded a new game or a game that hadn't had the mod yet
             if (specializationPriorities == null)
             {
                 specializationPriorities = new Dictionary<long, Dictionary<ProfessionType, List<string>>>();
@@ -50,27 +67,23 @@ namespace WitchyMods.AbsoluteProfessionPriorities
             HumanManager humanManager = WorldScripts.Instance.humanManager;
 
             //If we don't have this id in the dictionnary, add it
-            if (!specializationPriorities.ContainsKey(id))
+            if (!specializationPriorities.ContainsKey(id)) {
                 specializationPriorities.Add(id, new Dictionary<ProfessionType, List<string>>());
+            } 
 
-            //Get the human corresponding to this ID
-            HumanAI colonist = humanManager.GetHumans().First(x => x.GetID() == id);
+            foreach(var profession in defaultPriorities.Keys) {
+                if (!specializationPriorities[id].ContainsKey(profession)) {
+                    specializationPriorities[id].Add(profession, new List<string>());
+                }
 
-            //For each profession except NoJob and Soldier
-            foreach (var profession in colonist.professionManager.professions.Values.Where(
-                x => x.type != ProfessionType.NoJob && x.type != ProfessionType.Soldier))
-            {
-                //If we don't have the profession in the dictionary, add it
-                if (!specializationPriorities[id].ContainsKey(profession.type))
-                    specializationPriorities[id].Add(profession.type, new List<string>());
+                //Remove all specializations that don't exist anymore
+                specializationPriorities[id][profession].RemoveAll(x => !defaultPriorities[profession].Contains(x));
 
-                List<string> colSpecs = profession.specializations.Keys.ToList();
-
-                //Remove all of the specializations that do not exist anymore
-                specializationPriorities[id][profession.type].RemoveAll(x => !colSpecs.Contains(x));
-
-                //Add all of the specializations that are missing
-                specializationPriorities[id][profession.type].AddRange(colSpecs.Where(x => !specializationPriorities[id][profession.type].Contains(x)));
+                //Add the missing ones
+                foreach(var spec in defaultPriorities[profession]) {
+                    if (!specializationPriorities[id][profession].Contains(spec))
+                        specializationPriorities[id][profession].Add(spec);
+                }
             }
         }
 

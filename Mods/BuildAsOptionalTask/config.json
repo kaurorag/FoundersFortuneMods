@@ -1,8 +1,11 @@
 ﻿{
   "name": "BuildAsProfessionTask",
-  "version": "1.1.1",
+  "version": "1.2.1",
   "author": "Witchy",
   "website": "",
+  "priority": {
+    "load": { "after": ["*"] }
+  },
   "description": "
 [h1]Description[/h1]
 Adds 'Build' as a task under each profession. 

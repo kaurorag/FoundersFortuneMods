@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{D32DB40F-1D45-49FC-8813-F43D367E8D64}</ProjectGuid>
+    <ProjectGuid>{E5676050-13C5-4D96-9739-E0F149F98126}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>WitchyMods.PoutOnYourOwn</RootNamespace>
-    <AssemblyName>PoutOnYourOwn</AssemblyName>
+    <RootNamespace>WitchyMods.NoMoreBedTime</RootNamespace>
+    <AssemblyName>NoMoreBedTime</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -65,7 +65,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="PoutOnYourOwnMod.cs" />
+    <Compile Include="NoMoreBedTimeMod.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -73,16 +73,8 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-  <ItemGroup>
-    <Content Include="logo.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="publishedFileId.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>$(SolutionDir)Utilities\FFModPostBuild.exe $(TargetDir) "$(ProjectName)"</PostBuildEvent>
+    <PostBuildEvent>$(SolutionDir)..\Utilities\FFModPostBuild.exe $(TargetDir) "$(ProjectName)"</PostBuildEvent>
   </PropertyGroup>
 </Project>

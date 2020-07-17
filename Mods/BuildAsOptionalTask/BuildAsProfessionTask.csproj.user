@@ -6,4 +6,8 @@
     </StartProgram>
     <StartURL>steam://rungameid/1104330</StartURL>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'ModKit|AnyCPU'">
+    <StartURL>steam://rungameid/1104330</StartURL>
+    <StartAction>URL</StartAction>
+  </PropertyGroup>
 </Project>

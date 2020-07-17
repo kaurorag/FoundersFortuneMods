@@ -36,7 +36,7 @@ namespace WitchyMods.AbsoluteProfessionPriorities
         public void OrderUp()
         {
 #if !MODKIT
-            AbsoluteProfessionPrioritiesMod mod = ModHandler.mods.scriptMods.OfType<AbsoluteProfessionPrioritiesMod>().First();
+            AbsoluteProfessionPrioritiesMod mod = AbsoluteProfessionPrioritiesMod.Instance;
             List<String> specs = mod.specializationPriorities[ParentPanel.Human.GetID()][ParentPanel.ProfessionType];
 
             int curIndex = specs.IndexOf(this.Specialization);
@@ -56,7 +56,7 @@ namespace WitchyMods.AbsoluteProfessionPriorities
         public void OrderDown()
         {
 #if !MODKIT
-            AbsoluteProfessionPrioritiesMod mod = ModHandler.mods.scriptMods.OfType<AbsoluteProfessionPrioritiesMod>().First();
+            AbsoluteProfessionPrioritiesMod mod = AbsoluteProfessionPrioritiesMod.Instance;
             List<String> specs = mod.specializationPriorities[ParentPanel.Human.GetID()][ParentPanel.ProfessionType];
 
             int curIndex = specs.IndexOf(this.Specialization);
@@ -77,7 +77,7 @@ namespace WitchyMods.AbsoluteProfessionPriorities
         public void ToggleValueChanged(bool value)
         {
 #if !MODKIT
-            ParentPanel.Human.professionManager.SetSpecializationActive(this.Specialization, ParentPanel.ProfessionType, value, ParentPanel.Human);
+            ParentPanel.Human.professionManager.SetSpecializationActive(this.Specialization, ParentPanel.ProfessionType, Toggle.isOn, ParentPanel.Human);
 #endif
         }
 

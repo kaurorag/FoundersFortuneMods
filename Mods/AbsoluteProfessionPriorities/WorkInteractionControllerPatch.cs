@@ -27,7 +27,7 @@ namespace WitchyMods.AbsoluteProfessionPriorities
                 return false;
 
             //Allows us to call the private method CheckInteraction later on
-            MethodInfo mInfo = typeof(WorkInteractionController).GetMethod("CheckInteraction", BindingFlags.NonPublic | BindingFlags.Instance);
+            MethodInfo mInfo = AccessTools.Method(typeof(WorkInteractionController),"CheckInteraction", new Type[] {typeof(InteractionRestricted), typeof(HumanAI) });
 
             //Creates a dictionary of all of the colonist's active professions, grouped by priorities (number of stars)
             Dictionary<int, List<Profession>> profs = human.professionManager.professions.Values.Where(
@@ -43,16 +43,12 @@ namespace WitchyMods.AbsoluteProfessionPriorities
                 availableInteractions.Clear();
                 foreach (var profession in profs[professionPriority])
                 {
-                    human.professionManager.GetInteractions(human, availableInteractions);
                     profession.GetInteractions(human, availableInteractions);
                 }
 
-                //Sorts all interactions by priority.
-                availableInteractions.Sort((x, y) => y.priority.CompareTo(x.priority));
-
                 //For all found interactions, test each.  If it's 'doable', we have found the next interaction and return it
                 //to be queued
-                foreach (var task in availableInteractions)
+                foreach (var task in availableInteractions.OrderByDescending(x=>x.priority))
                 {
                     InteractionInfo info = (InteractionInfo)mInfo.Invoke(__instance, new Object[] { task, human });
                     if (info != null)

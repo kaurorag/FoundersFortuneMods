@@ -21,7 +21,6 @@ namespace WitchyMods.AbsoluteProfessionPriorities
         public ProfessionType ProfessionType { get; set; }
         public HumanAI Human { get; set; }
 
-        private List<string> _Specializations = null;
         private List<SpecializationDetailsPanel> _DetailPanels = new List<SpecializationDetailsPanel>();
 
         /// <summary>
@@ -35,9 +34,6 @@ namespace WitchyMods.AbsoluteProfessionPriorities
         public void Init(ProfessionType pType, List<ProfessionSpecializationDescription> specializations)
         {
             this.ProfessionType = pType;
-
-            //Creates the list of specialization names
-            _Specializations = specializations.Select(x=>x.name).ToList();
 
             //For each specialization, create a detail panel
             foreach (var spec in specializations)
@@ -54,17 +50,19 @@ namespace WitchyMods.AbsoluteProfessionPriorities
         public void SetHuman(HumanAI human)
         {
             this.Human = human;
+
+            //Get the instance of the mod and inits the human
+            AbsoluteProfessionPrioritiesMod.Instance.InitHuman(this.Human.GetID());
+
             UpdateDetails();
         }
 
         public void UpdateDetails()
         {
-            //Get the instance of the mod and inits the human
-            AbsoluteProfessionPrioritiesMod mod = ModHandler.mods.scriptMods.OfType<AbsoluteProfessionPrioritiesMod>().First();
-            mod.InitHuman(this.Human.GetID());
+            if (!AbsoluteProfessionPrioritiesMod.Instance.specializationPriorities[this.Human.GetID()].ContainsKey(this.ProfessionType)) return;
 
             //For each specialization, update the detail panel
-            List<String> orderedSpecs = mod.specializationPriorities[this.Human.GetID()][this.ProfessionType];
+            List<String> orderedSpecs = AbsoluteProfessionPrioritiesMod.Instance.specializationPriorities[this.Human.GetID()][this.ProfessionType];
 
             for (int i = 0; i < orderedSpecs.Count; i++)
             {

@@ -34,7 +34,7 @@ namespace WitchyMods.UIImprovements
             backgroundImage = this.GetComponent<Image>();
             backgroundImage.color = backgroundColor;
 
-            GameObject iconObj = new GameObject("icon", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            GameObject iconObj = new GameObject("icon", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Button));
             iconObj.transform.SetParent(this.transform);
             iconImage = iconObj.GetComponent<Image>();
             iconImage.raycastTarget = false;
@@ -60,7 +60,10 @@ namespace WitchyMods.UIImprovements
 
             this.ToolTip = this.GetComponent<TooltipHoverable>();
 
-            this.GetComponent<Button>().onClick.AddListener(new UnityEngine.Events.UnityAction(ButtonClicked));
+            Button btn = iconObj.GetComponent<Button>();
+            btn.targetGraphic = iconImage;
+            btn.interactable = true;
+            btn.onClick.AddListener(new UnityEngine.Events.UnityAction(ButtonClicked));
 
             UpdateInteraction(null);
         }
@@ -97,7 +100,7 @@ namespace WitchyMods.UIImprovements
 
                 Pair<string, string>[] substitutions = new Pair<string, string>[] { new Pair<string, string>("keyBinding", Helper.GetKeyCodeName(SettingsHandler.GetCurrentSettings().keybindings[Keybinding.MultipleOrders])) };
 
-                String tooltipTitle = current.interactable.GetInteractionName(current.interaction);
+                String tooltipTitle = current.interactable.GetInteractionName(current.interaction, this.Human);
                 String tooltipText = Helper.SubstituteCode("interactionChainIconDesc", substitutions);
 
                 this.ToolTip.Init(tooltipTitle, tooltipText);
@@ -112,8 +115,14 @@ namespace WitchyMods.UIImprovements
 
         public void ButtonClicked()
         {
-            if (this.Human.GetCurrentInteractionInfo() != null)
-                this.Human.AbortInteractionAt(0, true, false);
+            DebugLogger.Log("Button clicked");
+            if(this.Human.IsControllable() && this.Human.GetCurrentInteractionInfo() != null)
+            {
+                if (this.Human.AbortInteractionAt(0, true))
+                {
+                    this.Human.decisionMaker.NoDecisionsForSeconds(2.5f);
+                }
+            }
         }
     }
 }
