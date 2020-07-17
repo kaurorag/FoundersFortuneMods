@@ -64,7 +64,7 @@ namespace WitchyMods.UIImprovements
 
                 //Current task in portrait
                 {
-                    GameObject obj = new GameObject("PortraitCurrentTaskPanel", typeof(RectTransform), typeof(CanvasRenderer), typeof(TooltipHoverable), typeof(Image), typeof(Button), typeof(LayoutElement), typeof(PortraitCurrentTask));
+                    GameObject obj = new GameObject("PortraitCurrentTaskPanel", typeof(RectTransform), typeof(CanvasRenderer), typeof(TooltipHoverable), typeof(Image), typeof(LayoutElement), typeof(PortraitCurrentTask));
                     PortraitCurrentTask ct = obj.GetComponent<PortraitCurrentTask>();
                     ct.Init();
                     obj.transform.SetParent(template.background.transform);

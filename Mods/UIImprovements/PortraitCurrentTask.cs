@@ -60,11 +60,6 @@ namespace WitchyMods.UIImprovements
 
             this.ToolTip = this.GetComponent<TooltipHoverable>();
 
-            Button btn = iconObj.GetComponent<Button>();
-            btn.targetGraphic = iconImage;
-            btn.interactable = true;
-            btn.onClick.AddListener(new UnityEngine.Events.UnityAction(ButtonClicked));
-
             UpdateInteraction(null);
         }
 
@@ -110,18 +105,6 @@ namespace WitchyMods.UIImprovements
                 iconImage.color = emptyColor;
                 backgroundImage.color = emptyColor;
                 frameImage.color = emptyColor;
-            }
-        }
-
-        public void ButtonClicked()
-        {
-            DebugLogger.Log("Button clicked");
-            if(this.Human.IsControllable() && this.Human.GetCurrentInteractionInfo() != null)
-            {
-                if (this.Human.AbortInteractionAt(0, true))
-                {
-                    this.Human.decisionMaker.NoDecisionsForSeconds(2.5f);
-                }
             }
         }
     }

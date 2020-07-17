@@ -22,30 +22,19 @@ namespace WitchyMods.BuildAsProfessionTask
             if(appMod == null)
             {
                 harmony.Patch(
-                    AccessTools.Method(typeof(ProfessionManager), "GetInteractions"), 
-                    new HarmonyMethod(AccessTools.Method(typeof(ProfessionManagerPatch), "GetInteractionsPrefix")));
-
-                harmony.Patch(
                     AccessTools.Method(typeof(Profession), "GetInteractions"), 
                     new HarmonyMethod(AccessTools.Method(typeof(ProfessionPatch), "GetInteractionsPrefix"))
                     );
             }
             else
             {
-                Type aPPProfessionManagerPatch = appMod.GetType().Assembly.GetType("WitchyMods.AbsoluteProfessionPriorities.ProfessionManagerPatch");
                 Type aPPProfessionPatch = appMod.GetType().Assembly.GetType("WitchyMods.AbsoluteProfessionPriorities.ProfessionPatch");
 
-                MethodBase mManagerOriginalMethod = AccessTools.Method(aPPProfessionManagerPatch, "GetInteractionsForMods");
                 MethodBase mOriginalMethod = AccessTools.Method(aPPProfessionPatch, "GetInteractionsForMods");
-
-                MethodInfo mManagerPatchMethod = AccessTools.Method(typeof(APPProfessionManagerPatch), "GetInteractionsForModsPrefix");
                 MethodInfo mPatchMethod = AccessTools.Method(typeof(APPProfessionPatch), "GetInteractionsForModsPrefix");
 
-                harmony.Patch(mManagerOriginalMethod, new HarmonyMethod(mManagerPatchMethod));
                 harmony.Patch(mOriginalMethod, new HarmonyMethod(mPatchMethod));
             }
-
-            UnityEngine.MonoBehaviour.print("BuildAsProfessionTask loaded");
         }
 
         public override void Start()
@@ -61,7 +50,7 @@ namespace WitchyMods.BuildAsProfessionTask
 
             foreach (ProfessionType pType in Enum.GetValues(typeof(ProfessionType)))
             {
-                if (pType == ProfessionType.NoJob) continue;
+                if (pType == ProfessionType.NoJob || pType == ProfessionType.Soldier || pType == ProfessionType.Builder) continue;
 
                 if (!ProfessionManager.workInteractions.ContainsKey(pType)) continue;
 
@@ -76,19 +65,6 @@ namespace WitchyMods.BuildAsProfessionTask
         public override void Update() { }
     }
 
-    public class ProfessionManagerPatch
-    {
-        public static bool GetInteractionsPrefix(HumanAI human, List<InteractionRestricted> list)
-        {
-            //Overrides the GetInteractions method from the ProfessionManager
-            //Originally, it returns Construct and Destruct for the "NoJob" professions,
-            //Meaning that all colonists have that interaction available to them regardless of the profession
-            //By returning false, that method now does nothing and colonist do not automatically
-            //have the Construct and Deconstruct interaction available to them at all times
-            return false;
-        }
-    }
-
     public static class ProfessionPatch
     {
         public static void GetInteractionsPrefix(Profession __instance, HumanAI human, List<InteractionRestricted> list)
@@ -100,14 +76,6 @@ namespace WitchyMods.BuildAsProfessionTask
                 list.Add(new InteractionRestricted(Interaction.Construct, __instance.priority * 20));
                 list.Add(new InteractionRestricted(Interaction.Deconstruct, __instance.priority * 20));
             }
-        }
-    }
-
-    public static class APPProfessionManagerPatch
-    {
-        public static bool GetInteractionsForModsPrefix(HumanAI human, List<InteractionRestricted> list)
-        {
-            return false;
         }
     }
 

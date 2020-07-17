@@ -1,6 +1,6 @@
 ﻿{
   "name": "BuildAsProfessionTask",
-  "version": "1.2.1",
+  "version": "1.2.0",
   "author": "Witchy",
   "website": "",
   "priority": {
@@ -18,6 +18,7 @@ still end up building even if they have available tasks to do for their 3 stars 
 
 [h1]Changelog[/h1]
 [list]
+[*][b]1.2.0[/b]: Compatibility with Alpha 14
 [*][b]1.1.0[/b]: Compatibility with AbsoluteProfessionPriorities mod 2.0
 [*][b]1.0.1[/b]: Increased priority of the Build task so colonist will Build first before doing something else.
 [/list]
@@ -32,8 +33,6 @@ However, if you'd like to support my modding efforts, [b][url=https://www.buymea
 [h1]Contact[/h1]
 If you'd like to report a bug or suggest an idea or need help with modding, join the official Founders' Fortune [url=https://discord.gg/GkhSZeT]Discord Channel[/url]",
   "compatibleVersions": [
-    "Alpha 13.0.09",
-    "Alpha 13.0.10",
-	"Alpha 13.0.11"
+    "Alpha 14.0"
   ]
 }
