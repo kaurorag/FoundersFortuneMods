@@ -7,11 +7,9 @@ using System.Threading.Tasks;
 using HarmonyLib;
 using UnityEngine;
 
-namespace WitchyMods.UIImprovements
-{
+namespace WitchyMods.UIImprovements {
     [Serializable()]
-    public class UIImprovementsMod : Mod
-    {
+    public class UIImprovementsMod : Mod {
         [NonSerialized]
         public Furniture SelectedFurniture = null;
 
@@ -25,65 +23,49 @@ namespace WitchyMods.UIImprovements
         private NotificationItem _MigrantNotification = null;
 
         [NonSerialized]
-        private String _LastText = null;
+        private float _LastMigrantTime = -1;
 
         [NonSerialized]
         private String _TimerTextTemplate = null;
 
-        public override void Load()
-        {
+
+        public override void Load() {
             Harmony harmony = new Harmony("UIImprovements");
             harmony.PatchAll();
         }
 
-        public override void Start()
-        {
+        public override void Start() {
             Instance = this;
             _TimerTextTemplate = Localization.GetText("witchy_UIImprovements_MigrationTimer");
         }
 
-        public override void Update()
-        {
-            String timeText = GetNotificationText();
+        public override void Update() {
+            if (WorldScripts.Instance.incidentManager.timeToNextMigrant != _LastMigrantTime) {
+                _LastMigrantTime = WorldScripts.Instance.incidentManager.timeToNextMigrant;
 
-            if (timeText != _LastText)
-            {
-                String text = String.Format(_TimerTextTemplate, timeText);
+                if (_MigrantNotification != null && _MigrantNotification.isActiveAndEnabled) {
+                    _MigrantNotification.SetText(GetNotificationText());
 
-                if (_MigrantNotification != null && _MigrantNotification.isActiveAndEnabled)
-                    _MigrantNotification.SetText(text);
-
-                else if (ReadyForMigrant())
-                    _MigrantNotification = new NotificationConfig("witchy_newMigrant", text, UISound.NotificationGeneric, null, new Func<bool>(this.IsNotificationObsolete), null, -1, false).Show();
-
-                else
-                {
-                    _LastText = null;
-                    return;
-                }
-
-                _LastText = timeText;
+                } else if (ReadyForMigrant())
+                    _MigrantNotification = new NotificationConfig("witchy_newMigrant", GetNotificationText(), UISound.NotificationGeneric, null, new Func<bool>(this.IsNotificationObsolete), null, -1, false).Show();
             }
         }
 
-        private bool ReadyForMigrant()
-        {
+        private bool ReadyForMigrant() {
             HumanManager hManager = WorldScripts.Instance.humanManager;
             return (hManager.AreExpectationsMet() &&
                 !hManager.HasTooManyColonists() &&
                 WorldScripts.Instance.furnitureFactory.GetModules<AttentionModule>().Any<AttentionModule>(x => x.lit));
         }
 
-        private bool IsNotificationObsolete()
-        {
+        private bool IsNotificationObsolete() {
             return WorldScripts.Instance.incidentManager.currentEvents.Any<GameEvent>(x => x.GetEventType() == GameEventType.Migrant) || !ReadyForMigrant();
         }
 
-        private String GetNotificationText()
-        {
-            IncidentManager incidentManager = WorldScripts.Instance.incidentManager;
-            string second = Mathf.FloorToInt(incidentManager.timeToNextMigrant / 60f) + ":" + Mathf.FloorToInt(incidentManager.timeToNextMigrant % 60f).ToString("D2");
-            return second;
+        private string GetNotificationText() {
+            return String.Format(_TimerTextTemplate, 
+                Mathf.FloorToInt(WorldScripts.Instance.incidentManager.timeToNextMigrant / 60f), 
+                Mathf.FloorToInt(WorldScripts.Instance.incidentManager.timeToNextMigrant % 60f));
         }
     }
 }

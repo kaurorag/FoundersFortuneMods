@@ -14,6 +14,7 @@ namespace WitchyMods.UIImprovements {
         private bool OldCanEquip = true;
 
         private HumanAI OldOwner = null;
+        private Furniture OldFurniture = null;
 
         private static ColorBlock colorBlock = new ColorBlock() {
             colorMultiplier = 1,
@@ -26,7 +27,7 @@ namespace WitchyMods.UIImprovements {
         };
 
         public void InitButton(EquipmentDetailPanel detailPanel, String equipmentName, bool interactable) {
-            Button button = this.GetComponent<Button>();
+            Button button = this.GetComponent<Button>(); if (button == null) return;
             button.colors = colorBlock;
 
             EquipmentName = equipmentName;
@@ -45,27 +46,30 @@ namespace WitchyMods.UIImprovements {
 
         public void UpdateUI() {
 
-            Button button = this.GetComponent<Button>();
+            Button button = this.GetComponent<Button>(); if (button == null) return;
  
             if (!button.interactable || String.IsNullOrEmpty(EquipmentName)) return;
 
             bool canEquip = true;
 
             Furniture furniture = UIImprovementsMod.Instance.SelectedFurniture;
+            if (OldFurniture != furniture) {
+                OldFurniture = furniture;
 
-            if (furniture != null) {
-                OwnershipModule ownershipModule = furniture.GetModule<OwnershipModule>();
-                if (ownershipModule == null && OldOwner != null)
-                    OldOwner = null;
-                else if (ownershipModule.owner != OldOwner) {
-                    EquipmentDescription desc = Equipment.GetDescriptions()[EquipmentName];
-                    OldOwner = ownershipModule.owner;
+                if (furniture != null) {
+                    OwnershipModule ownershipModule = furniture.GetModule<OwnershipModule>();
+                    if (ownershipModule == null && OldOwner != null)
+                        OldOwner = null;
+                    else if (ownershipModule.owner != OldOwner) {
+                        EquipmentDescription desc = Equipment.GetDescriptions()[EquipmentName];
+                        OldOwner = ownershipModule.owner;
+                    }
+
+                    if (OldOwner != null)
+                        canEquip = CanOwnerEquip();
+                    else
+                        canEquip = OldCanEquip;
                 }
-
-                if (OldOwner != null)
-                    canEquip = CanOwnerEquip();
-                else
-                    canEquip = OldCanEquip;
             }
 
             if (canEquip != OldCanEquip) {

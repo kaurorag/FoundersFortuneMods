@@ -1,6 +1,6 @@
 ﻿{
   "name": "UIImprovements",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "author": "Witchy",
   "website": "",
   "description": "
@@ -11,9 +11,12 @@ Adds various improvements to the UI
 [*]The current task now displays next to the portrait of each colonist.
 [*]When opening the equipment panel to select a weapon/tool/armor/clothing to put into storage, if the owner of the furniture cannot equip it the button will be red.
 [*]When conditions are met, a timer for the next migrant will appear in the notifications
-[*]Available reward points are now displayed next to the colonist portraits
+[list]
+[*]Red: Not enough points to purchase a positive trait or negative trait removal
+[*]Yellow: Enough points to purchase a 'minor' (1 pt value) positive trait
+[*]Green: Enough points to purchase a positive trait or negative trait removal
+[/list]
 [*]When an object has been marked for deletion, the 'Delete' button will be greyed out (black)
-[*]Clicking on objects on the map will display more infos for:
 [/list]
 
 Check the screenshots for examples.
@@ -22,6 +25,7 @@ If you have an idea to improve the UI, let me know and I'll do my best to implem
 
 [h1]Changelog[/h1]
 [list]
+[*][b]1.1.2[/b] Satisfaction points text now display the correct color.  Added some checks so the mod overall performs better.
 [*][b]1.1.1[/b] Restored Furniture status button feature.  Fixed issue with migrant message.
 [*][b]1.1.0[/b] Removed the info panels as they are now in the vanilla game.  Clicking on the current task in the portrait panel cannot cancel the current task (bugged).  I'll investigate later
 [*][b]1.0.5[/b] Fixed bug where new equipment would not display correctly in the equipment overview

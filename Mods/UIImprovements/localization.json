@@ -6,7 +6,7 @@
     "english": "{0} has {1} Satisfaction points to spend."
   },
   "witchy_UIImprovements_MigrationTimer": {
-    "english": "New colonist will arrive in {0}"
+    "english": "New colonist will arrive in {0}:{1:00}"
   },
   "witchy_UIImprovements_Soil_Watered": {
     "english": "Watered: {0}/2"
