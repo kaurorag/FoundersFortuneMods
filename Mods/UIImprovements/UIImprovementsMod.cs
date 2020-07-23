@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if !MODKIT
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -28,6 +29,9 @@ namespace WitchyMods.UIImprovements {
         [NonSerialized]
         private String _TimerTextTemplate = null;
 
+        [NonSerialized]
+        public List<AnimalButton> AnimalButtons = null;
+
 
         public override void Load() {
             Harmony harmony = new Harmony("UIImprovements");
@@ -37,6 +41,15 @@ namespace WitchyMods.UIImprovements {
         public override void Start() {
             Instance = this;
             _TimerTextTemplate = Localization.GetText("witchy_UIImprovements_MigrationTimer");
+
+            AnimalButtons = new List<AnimalButton>();
+            GameObject animalPanel = GameObject.Instantiate(ModHandler.mods.gameObjects["AnimalCyclerPanel"], CanvasHandler.Instance.transform);
+
+            foreach (var btn in animalPanel.GetComponentsInChildren<AnimalButton>()) {
+                AnimalButtons.Add(btn);
+                btn.UpdateCountText();
+            }
+
         }
 
         public override void Update() {
@@ -69,3 +82,4 @@ namespace WitchyMods.UIImprovements {
         }
     }
 }
+#endif

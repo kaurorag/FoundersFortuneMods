@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿#if !MODKIT
+using HarmonyLib;
 using UnityEngine;
 
 namespace WitchyMods.UIImprovements
@@ -18,3 +19,4 @@ namespace WitchyMods.UIImprovements
         }
     }
 }
+#endif

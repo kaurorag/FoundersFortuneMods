@@ -1,6 +1,6 @@
 ﻿{
   "name": "UIImprovements",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "author": "Witchy",
   "website": "",
   "description": "
@@ -8,6 +8,7 @@ Adds various improvements to the UI
 
 [h1]FEATURES:[/h1]
 [list]
+[*][b]NEW!!![/b]Buttons on the top right next to the notifications to show the current count for animals.  Clicking on them will cycle through the animals and focus the camera on them.  The text will turn red if the count is over the limit.
 [*]The current task now displays next to the portrait of each colonist.
 [*]When opening the equipment panel to select a weapon/tool/armor/clothing to put into storage, if the owner of the furniture cannot equip it the button will be red.
 [*]When conditions are met, a timer for the next migrant will appear in the notifications
@@ -25,6 +26,7 @@ If you have an idea to improve the UI, let me know and I'll do my best to implem
 
 [h1]Changelog[/h1]
 [list]
+[*][b]1.2.0[/b] Added new feature: Animal Cyclers buttons
 [*][b]1.1.2[/b] Satisfaction points text now display the correct color.  Added some checks so the mod overall performs better.
 [*][b]1.1.1[/b] Restored Furniture status button feature.  Fixed issue with migrant message.
 [*][b]1.1.0[/b] Removed the info panels as they are now in the vanilla game.  Clicking on the current task in the portrait panel cannot cancel the current task (bugged).  I'll investigate later
@@ -43,7 +45,16 @@ My mods will always be free!
 However, if you'd like to support my modding efforts, [b][url=https://www.buymeacoffee.com/WitchyMods]Buy Me A Coffee[/url][/b].
 
 [h1]Contact[/h1]
-If you'd like to report a bug or suggest an idea or need help with modding, join the official Founders' Fortune [url=https://discord.gg/GkhSZeT]Discord Channel[/url]",
+If you'd like to report a bug or suggest an idea or need help with modding, join the official Founders' Fortune [url=https://discord.gg/GkhSZeT]Discord Channel[/url]
+
+[h1]Credits[/h1]
+Animal icons credits goes to 'iconixar' from flaticon.com
+[list]
+[url=https://www.flaticon.com/free-icon/cow_2911237]Cow[/url]
+[url=https://www.flaticon.com/free-icon/pig_2911273]Pig[/url]
+[url=https://www.flaticon.com/free-icon/sheep_2911292]Sheep[/url]
+[/list]
+",
   "compatibleVersions": [
     "Alpha 13.0.11",
     "Alpha 14.0"

@@ -33,7 +33,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'ModKit|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\ModKit\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;MODKIT</DefineConstants>
     <DebugType>full</DebugType>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
@@ -87,6 +87,7 @@
     <Compile Include="..\..\UnityUtils.cs">
       <Link>UnityUtils.cs</Link>
     </Compile>
+    <Compile Include="AnimalButton.cs" />
     <Compile Include="EquipmentButton.cs" />
     <Compile Include="EquipmentPatch.cs" />
     <Compile Include="FurnitureStatusPanelPatch.cs" />
@@ -121,6 +122,14 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>$(SolutionDir)Utilities\FFModPostBuild.exe $(TargetDir) "$(ProjectName)"</PostBuildEvent>
+    <PostBuildEvent>if $(ConfigurationName) == ModKit (
+copy /y $(TargetPath) "E:\FFModKit-master\FFModKitUnity\Assets\"$(TargetFileName)
+) else (
+$(SolutionDir)Utilities\FFModPostBuild.exe $(TargetDir) "$(ProjectName)")</PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PreBuildEvent>if not $(ConfigurationName) == ModKit (
+$(SolutionDir)Utilities\\FFModPreBuild.exe $(ProjectPath) "$(ProjectName)" "E:\FFModKit-master"
+)</PreBuildEvent>
   </PropertyGroup>
 </Project>
