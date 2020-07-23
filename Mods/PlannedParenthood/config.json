@@ -1,6 +1,6 @@
 ﻿{
   "name": "PlannedParenthood",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "Witchy",
   "website": "",
   "description": "
@@ -10,7 +10,8 @@ The text of the 'New child' window has been changed to indicate that the parents
 
 [h1]Changelog[/h1]
 [list]
-[*][b]1.0.0[/b] Initial release
+[*][b]1.0.1[/b]: Fixed bug when 2nd request would spawn a child regardless.  Increased timer upon rejection so that the game doesn't ask as often.
+[*][b]1.0.0[/b]: Initial release
 [/list]
 
 [h1]How does it work?[/h1]

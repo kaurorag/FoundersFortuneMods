@@ -158,7 +158,9 @@ namespace WitchyMods.PlannedParenthood
 
         public static void RejectClicked(BirthdayChildPanel bdPanel)
         {
+            AccessTools.Field(typeof(HumanManager), "lastChildUpdateTime").SetValue(WorldScripts.Instance.humanManager, Time.time + 600);
             bdPanel.gameObject.SetActive(false);
+            PlannedParenthoodMod.InAddChild = false;
         }
 
         public static void InputChanged(BirthdayChildPanel bdPanel)
