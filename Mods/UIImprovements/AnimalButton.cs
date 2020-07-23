@@ -6,14 +6,9 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 using HarmonyLib;
+using System.Collections;
 
 namespace WitchyMods.UIImprovements {
-
-    public enum AnimalType {
-        Cow,
-        Pig,
-        Sheep
-    }
 
     [RequireComponent(typeof(Button))]
     public class AnimalButton : MonoBehaviour {
@@ -22,6 +17,7 @@ namespace WitchyMods.UIImprovements {
 
         public Text CountText;
 
+        public Image AnimalIconImage;
 #if !MODKIT
 
         public HumanType HumanType { get { return (HumanType)Enum.Parse(typeof(HumanType), this.AnimalType.ToString()); } }
@@ -32,7 +28,7 @@ namespace WitchyMods.UIImprovements {
             this.GetComponent<Button>().onClick.AddListener(new UnityEngine.Events.UnityAction(OnClick));
         }
 
-        public void UpdateCountText() {
+        public void UpdateUI() {
             animals = WorldScripts.Instance.humanManager.colonyFaction.GetLivingHumans().Where(x => x.humanType == this.HumanType).ToList();
             CountText.text = animals.Count.ToString();
             this.GetComponent<Button>().interactable = animals.Count != 0;
@@ -50,8 +46,9 @@ namespace WitchyMods.UIImprovements {
             WorldScripts.Instance.humanManager.SwitchActiveHuman(animals[index], true, true);
 #endif
         }
-    }
+}
 
+#if !MODKIT
     [HarmonyPatch()]
     public static class PatchesForAnimalButton {
 
@@ -59,27 +56,33 @@ namespace WitchyMods.UIImprovements {
         [HarmonyPatch(new Type[] { typeof(HumanConfiguration), typeof(Vector3), typeof(Faction), typeof(bool), typeof(HumanAI.Serializable) })]
         [HarmonyPostfix]
         public static void SpawnHuman_Postfix(HumanManager __instance, ref HumanAI __result, HumanConfiguration config, Vector3 position, Faction faction, bool alive = true, HumanAI.Serializable serial = null) {
-            if (!__result.IsHumanoid() && __result.animal != null && __result.faction is ColonyFaction) {
+            if (UIImprovementsMod.Instance == null || UIImprovementsMod.Instance.AnimalCyclerPanel == null) return;
+
+            if (__result != null && __result.faction != null && !__result.IsHumanoid() && __result.animal != null && __result.faction is ColonyFaction) {
                 HumanType type = __result.humanType;
-                UIImprovementsMod.Instance.AnimalButtons.First(x => x.HumanType == type).UpdateCountText();
+                UIImprovementsMod.Instance.AnimalCyclerPanel.UpdateUI(type);
             }
         }
 
         [HarmonyPatch(typeof(HumanManager), "MoveHumanToFaction")]
         [HarmonyPostfix]
         public static void MoveHumanToFaction_Postfix(HumanAI human, Faction factionNext) {
+            if (UIImprovementsMod.Instance == null || UIImprovementsMod.Instance.AnimalCyclerPanel == null) return;
+
             if (human.IsValid() && !human.IsHumanoid() && human.animal != null && human.faction is ColonyFaction) {
-                UIImprovementsMod.Instance.AnimalButtons.First(x => x.HumanType == human.humanType).UpdateCountText();
+                UIImprovementsMod.Instance.AnimalCyclerPanel.UpdateUI(human.humanType);
             }
         }
 
         [HarmonyPatch(typeof(HumanAI), "Die")]
         [HarmonyPostfix]
         public static void Die_Postfix(HumanAI __instance, bool oldAge, bool force = false) {
-            DebugLogger.Log($"{__instance.GetFullName()} a:{__instance.animal} f:{__instance.faction} t:{__instance.humanType}" );
+            if (UIImprovementsMod.Instance == null || UIImprovementsMod.Instance.AnimalCyclerPanel == null) return;
+
             if (!__instance.IsHumanoid() && __instance.animal != null && __instance.faction is ColonyFaction) {
-                UIImprovementsMod.Instance.AnimalButtons.First(x => x.HumanType == __instance.humanType).UpdateCountText();
+                UIImprovementsMod.Instance.AnimalCyclerPanel.UpdateUI(__instance.humanType);
             }
         }
     }
 }
+#endif

@@ -1,6 +1,6 @@
 ﻿{
   "name": "UIImprovements",
-  "version": "1.2.0",
+  "version": "1.2.2",
   "author": "Witchy",
   "website": "",
   "description": "
@@ -26,6 +26,7 @@ If you have an idea to improve the UI, let me know and I'll do my best to implem
 
 [h1]Changelog[/h1]
 [list]
+[*][b]1.2.2[/b] Fixed a crash on game loading.
 [*][b]1.2.0[/b] Added new feature: Animal Cyclers buttons
 [*][b]1.1.2[/b] Satisfaction points text now display the correct color.  Added some checks so the mod overall performs better.
 [*][b]1.1.1[/b] Restored Furniture status button feature.  Fixed issue with migrant message.

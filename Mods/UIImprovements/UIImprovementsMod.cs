@@ -30,8 +30,7 @@ namespace WitchyMods.UIImprovements {
         private String _TimerTextTemplate = null;
 
         [NonSerialized]
-        public List<AnimalButton> AnimalButtons = null;
-
+        public AnimalCyclerPanel AnimalCyclerPanel = null;
 
         public override void Load() {
             Harmony harmony = new Harmony("UIImprovements");
@@ -42,14 +41,17 @@ namespace WitchyMods.UIImprovements {
             Instance = this;
             _TimerTextTemplate = Localization.GetText("witchy_UIImprovements_MigrationTimer");
 
-            AnimalButtons = new List<AnimalButton>();
-            GameObject animalPanel = GameObject.Instantiate(ModHandler.mods.gameObjects["AnimalCyclerPanel"], CanvasHandler.Instance.transform);
-
-            foreach (var btn in animalPanel.GetComponentsInChildren<AnimalButton>()) {
-                AnimalButtons.Add(btn);
-                btn.UpdateCountText();
+            if (AnimalCyclerPanel != null) {
+                DebugLogger.Log("Panel isn't null!!");
             }
 
+            this.AnimalCyclerPanel = CanvasHandler.Instance.GetComponentInChildren<AnimalCyclerPanel>();
+
+            if (this.AnimalCyclerPanel == null) {
+                GameObject obj = GameObject.Instantiate(ModHandler.mods.gameObjects["AnimalCyclerPanel"], CanvasHandler.Instance.transform);
+                this.AnimalCyclerPanel = obj.GetComponent<AnimalCyclerPanel>();
+                this.AnimalCyclerPanel.Init();
+            }
         }
 
         public override void Update() {
@@ -76,8 +78,8 @@ namespace WitchyMods.UIImprovements {
         }
 
         private string GetNotificationText() {
-            return String.Format(_TimerTextTemplate, 
-                Mathf.FloorToInt(WorldScripts.Instance.incidentManager.timeToNextMigrant / 60f), 
+            return String.Format(_TimerTextTemplate,
+                Mathf.FloorToInt(WorldScripts.Instance.incidentManager.timeToNextMigrant / 60f),
                 Mathf.FloorToInt(WorldScripts.Instance.incidentManager.timeToNextMigrant % 60f));
         }
     }

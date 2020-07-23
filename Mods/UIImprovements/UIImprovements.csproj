@@ -88,6 +88,7 @@
       <Link>UnityUtils.cs</Link>
     </Compile>
     <Compile Include="AnimalButton.cs" />
+    <Compile Include="AnimalCyclerPanel.cs" />
     <Compile Include="EquipmentButton.cs" />
     <Compile Include="EquipmentPatch.cs" />
     <Compile Include="FurnitureStatusPanelPatch.cs" />
