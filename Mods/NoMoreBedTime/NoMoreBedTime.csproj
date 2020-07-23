@@ -47,6 +47,9 @@
       <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Founders Fortune\Founders Fortune_Data\Managed\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Assembly-CSharp-firstpass">
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Founders Fortune\Founders Fortune_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -74,12 +77,15 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="logo.jpg">
+    <None Include="logo.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="publishedFileId.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>$(SolutionDir)..\Utilities\FFModPostBuild.exe $(TargetDir) "$(ProjectName)"</PostBuildEvent>
+    <PostBuildEvent>$(SolutionDir)\Utilities\FFModPostBuild.exe $(TargetDir) "$(ProjectName)"</PostBuildEvent>
   </PropertyGroup>
 </Project>
