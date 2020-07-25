@@ -151,7 +151,7 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
             }
         }
 
-        private static InteractionInfo GetTendToFieldsInteraction(HumanAI human) {
+        public static InteractionInfo GetTendToFieldsInteraction(HumanAI human) {
             //Build a dictionary of ratios (NbOwned vs Capacity) so that we order the actions
             //By what is most needed.  i.e. if we have lots of tomatoes but no potatoes, we'll harvest potatoes first
             Dictionary<Resource, double> ratios = FieldsResources.ToDictionary(x => x, x => GetResourceRatio(x));
@@ -180,10 +180,12 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
                     .Where(x => x.resourceName == sortedFieldRes[r].ToString().ToLower())
                     .OrderBy(x => Vector3.Distance(position, x.parent.GetPosition()))) {
 
-                    foreach (var interaction in soil.GetInteractions(human, true, false)) {
-                        if (interaction.interaction != Interaction.RemovePlant &&
-                            !interaction.IsRestricted(soil.parent.GetInteractable(), human, true)) {
-                            return new InteractionInfo(interaction.interaction, soil.parent.GetInteractable(), interaction.restrictions, true, 50, false);
+                    foreach (var interactionRestricted in soil.GetInteractions(human, true, false)) {
+                        if (interactionRestricted.interaction != Interaction.RemovePlant &&
+                            interactionRestricted.interaction != Interaction.RemoveInfestedPlants &&
+                            interactionRestricted.interaction != YieldMicroInteractionHelper.TendToFieldsInteraction &&
+                            CheckInteraction(soil.parent.GetInteractable(), interactionRestricted, human)) {
+                            return new InteractionInfo(YieldMicroInteractionHelper.TendToFieldsInteraction, soil.parent.GetInteractable(), null, true, 50, false);
                         }
                     }
                 }
@@ -473,7 +475,7 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
             return ratio;
         }
 
-        private static InteractionInfo CheckInteraction(InteractionRestricted interactionRestricted, HumanAI human) {
+        public static InteractionInfo CheckInteraction(InteractionRestricted interactionRestricted, HumanAI human) {
             if (interactionRestricted.interaction == Interaction.Tame) {
                 foreach (HumanAI animal in human.faction.GetLivingHumans().Where(x => x.animal != null).OrderBy(x => x.animal.tameness)) {
                     if (CheckInteraction(animal.GetInteractable(), interactionRestricted, human)) {
@@ -490,7 +492,7 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
             return null;
         }
 
-        private static bool CheckInteraction(Interactable interactable, InteractionRestricted interactionRestricted, HumanAI human) {
+        public static bool CheckInteraction(Interactable interactable, InteractionRestricted interactionRestricted, HumanAI human) {
             if (!interactable.IsPossibleInteraction(interactionRestricted.interaction, human, true, false)) { return false; }
             if (interactionRestricted.restrictions != null && interactionRestricted.restrictions.Any(x => x.IsRestrictedFast(interactable, interactionRestricted.interaction, human, true))) { return false; }
             return true;

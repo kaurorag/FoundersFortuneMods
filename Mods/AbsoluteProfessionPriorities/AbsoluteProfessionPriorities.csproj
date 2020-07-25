@@ -45,8 +45,13 @@
       <HintPath>E:\Harmony.2.0.1.0\Release\net472\0Harmony.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Assembly-CSharp">
-      <HintPath>C:\FFBuild\Founders Fortune_Data\Managed\Assembly-CSharp.dll</HintPath>
+    <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Founders Fortune\Founders Fortune_Data\Managed\Assembly-CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Assembly-CSharp-firstpass, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Founders Fortune\Founders Fortune_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -87,12 +92,17 @@
     <Compile Include="SpecializationDetailsPanel.cs" />
     <Compile Include="SpecializationPanel.cs" />
     <Compile Include="WorkInteractionControllerPatch.cs" />
+    <Compile Include="TendToFieldsPatches.cs" />
+    <Compile Include="YieldMicroInteractionHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="config.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="AbsoluteProfessionPriorities.ffasset">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="localization.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

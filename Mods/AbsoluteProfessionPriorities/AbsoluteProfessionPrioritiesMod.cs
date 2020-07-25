@@ -6,11 +6,9 @@ using System.Threading.Tasks;
 using HarmonyLib;
 using System.Reflection;
 
-namespace WitchyMods.AbsoluteProfessionPriorities
-{
+namespace WitchyMods.AbsoluteProfessionPriorities {
     [Serializable]
-    public class AbsoluteProfessionPrioritiesMod : Mod
-    {
+    public class AbsoluteProfessionPrioritiesMod : Mod {
         //[humanId][ProfessionType][specializations] (ordered by priority where 0=most important]
         public Dictionary<long, Dictionary<ProfessionType, List<String>>> specializationPriorities = new Dictionary<long, Dictionary<ProfessionType, List<string>>>();
 
@@ -20,14 +18,18 @@ namespace WitchyMods.AbsoluteProfessionPriorities
         [NonSerialized]
         public static AbsoluteProfessionPrioritiesMod Instance;
 
-        public override void Load()
-        {
-            Harmony harmony = new Harmony("AbsoluteProfessionPriorities");
-            harmony.PatchAll();
+        public override void Load() {
+            try {
+                Harmony harmony = new Harmony("AbsoluteProfessionPriorities");
+                harmony.PatchAll();
+            }
+            catch (Exception ex) {
+                DebugLogger.Log(ex);
+                throw;
+            }
         }
 
-        public override void Start()
-        {
+        public override void Start() {
             Instance = this;
 
             //Prepare the default dictionary
@@ -42,9 +44,8 @@ namespace WitchyMods.AbsoluteProfessionPriorities
 
             defaultPriorities.Add(ProfessionType.Builder, new List<string>());
 
-                //If it's null, then we either loaded a new game or a game that hadn't had the mod yet
-            if (specializationPriorities == null)
-            {
+            //If it's null, then we either loaded a new game or a game that hadn't had the mod yet
+            if (specializationPriorities == null) {
                 specializationPriorities = new Dictionary<long, Dictionary<ProfessionType, List<string>>>();
             }
 
@@ -53,28 +54,25 @@ namespace WitchyMods.AbsoluteProfessionPriorities
             List<long> humanIds = humanManager.GetHumans().Where(x => x.faction.GetFactionType() == FactionType.Colony && x.humanType == HumanType.Colonist).Select(x => x.GetID()).ToList();
 
             //Remove all of the saved IDs that are not in the colony anymore
-            foreach (var removedId in specializationPriorities.Keys.Where(x => !humanIds.Contains(x)).ToArray())
-            {
+            foreach (var removedId in specializationPriorities.Keys.Where(x => !humanIds.Contains(x)).ToArray()) {
                 specializationPriorities.Remove(removedId);
             }
 
             //Init all of the IDs
-            foreach(var id in humanIds)
-            {
+            foreach (var id in humanIds) {
                 InitHuman(id);
             }
         }
 
-        public void InitHuman(long id)
-        {
+        public void InitHuman(long id) {
             HumanManager humanManager = WorldScripts.Instance.humanManager;
 
             //If we don't have this id in the dictionnary, add it
             if (!specializationPriorities.ContainsKey(id)) {
                 specializationPriorities.Add(id, new Dictionary<ProfessionType, List<string>>());
-            } 
+            }
 
-            foreach(var profession in defaultPriorities.Keys) {
+            foreach (var profession in defaultPriorities.Keys) {
                 if (!specializationPriorities[id].ContainsKey(profession)) {
                     specializationPriorities[id].Add(profession, new List<string>());
                 }
@@ -83,15 +81,14 @@ namespace WitchyMods.AbsoluteProfessionPriorities
                 specializationPriorities[id][profession].RemoveAll(x => !defaultPriorities[profession].Contains(x));
 
                 //Add the missing ones
-                foreach(var spec in defaultPriorities[profession]) {
+                foreach (var spec in defaultPriorities[profession]) {
                     if (!specializationPriorities[id][profession].Contains(spec))
                         specializationPriorities[id][profession].Add(spec);
                 }
             }
         }
 
-        public override void Update()
-        {
+        public override void Update() {
         }
     }
 }
