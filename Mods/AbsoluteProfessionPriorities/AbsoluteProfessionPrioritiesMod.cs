@@ -39,6 +39,9 @@ namespace WitchyMods.AbsoluteProfessionPriorities
                     defaultPriorities[profession].Add(spec.name);
                 }
             }
+
+            defaultPriorities.Add(ProfessionType.Builder, new List<string>());
+
                 //If it's null, then we either loaded a new game or a game that hadn't had the mod yet
             if (specializationPriorities == null)
             {

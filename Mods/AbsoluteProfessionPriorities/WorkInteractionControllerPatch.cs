@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace WitchyMods.AbsoluteProfessionPriorities {
     [HarmonyPatch(typeof(WorkInteractionController), "GetInteractionProposal")]
@@ -31,9 +32,11 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
                 x => x.priority > 0).GroupBy(x => x.priority).ToDictionary(
                 x => x.Key, x => x.ToList());
 
+            foreach (var p in human.professionManager.professions.Values.Where(x => x.priority > 0))
+
             //For each priority (number of stars), starting by the highest to the lowest
             foreach (var professionPriority in profs.Keys.OrderByDescending(x => x)) {
-                foreach (var profession in profs[professionPriority]) {
+                foreach (var profession in profs[professionPriority].OrderBy(x=> UnityEngine.Random.Range(0, profs[professionPriority].Count))) {
                     if (profession.type == ProfessionType.Soldier ||
                         profession.type == ProfessionType.NoJob)
                         continue;
@@ -52,78 +55,76 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
         }
 
         private static InteractionInfo GetNextInteraction(WorkInteractionController __instance, HumanAI human, Profession profession) {
-            //Allows us to call the private method CheckInteraction later on
-            MethodInfo checkInteractionMethod = AccessTools.Method(typeof(WorkInteractionController), "CheckInteraction", new Type[] { typeof(InteractionRestricted), typeof(HumanAI) });
-
             //Get all the specializations for this human for this profession
             List<string> specs = AbsoluteProfessionPrioritiesMod.Instance.specializationPriorities[human.GetID()][profession.type];
 
-            if (specs == null || specs.Count == 0) return null;
-
-            IEnumerable<InteractionRestricted> possibilities = null;
-
             switch (profession.type) {
-                case ProfessionType.Farmer: possibilities = GetFarmerInteractions(profession, specs); break;
-                case ProfessionType.Forester: possibilities = GetForesterInteractions(profession, specs); break;
-                case ProfessionType.Miner: possibilities = GetMinerInteractions(profession, specs); break;
-                case ProfessionType.Craftsman: possibilities = GetCraftsmanInteractions(profession, specs); break;
-                case ProfessionType.Doctor: possibilities = GetDoctorInteractions(profession, specs); break;
-                case ProfessionType.Scholar: possibilities = GetScholarInteractions(profession, specs); break;
-                case ProfessionType.Builder: possibilities = GetBuilderInteractions(profession, specs); break;
+                case ProfessionType.Farmer: return GetFarmerInteractions(profession, specs, human);
+                case ProfessionType.Forester: return GetForesterInteractions(profession, specs, human);
+                case ProfessionType.Miner: return GetMinerInteractions(profession, specs, human);
+                case ProfessionType.Craftsman: return GetCraftsmanInteractions(profession, specs, human);
+                case ProfessionType.Doctor: return GetDoctorInteractions(profession, specs, human);
+                case ProfessionType.Scholar: return GetScholarInteractions(profession, specs, human);
+                case ProfessionType.Builder: return GetBuilderInteractions(profession, specs, human);
                 default:
                     throw new NotImplementedException("The profession type is unknown to this mod and probably new.  " +
                         "This mod is thus incompatible with the current version of the game.  Please disable it.");
             }
-
-            foreach (var possibility in possibilities) {
-                InteractionInfo info = (InteractionInfo)checkInteractionMethod.Invoke(__instance, new object[] { possibility, human });
-                if (info != null) return info;
-            }
-
-            return null;
         }
 
         private static Resource[] FieldsResources = new Resource[] { Resource.Tomato, Resource.Pumpkin, Resource.Potato, Resource.Strawberry, Resource.Wheat, Resource.HealingPlantCultivated };
         private static String[] CookedFood = new string[] { "bakedApple", "bakedPotato", "bakedTomato", "pumpkinStew", "potatoSoup", "fruitSalad", "bread", "strawberryCake", "appleStrudel" };
         private static String[] Meds = new string[] { "healingPotion", "medicine" };
 
-        private static IEnumerable<InteractionRestricted> GetFarmerInteractions(Profession p, List<String> specs) {
+        private static InteractionInfo GetFarmerInteractions(Profession p, List<String> specs, HumanAI human) {
 
-            for (int i = 0; i < specs.Count; i++) {
+            InteractionInfo info = null;
+
+            for (int i = 0; i < specs.Count && info == null; i++) {
                 if (!p.HasSpecialization(specs[i])) continue;
 
                 switch (specs[i]) {
-                    case "tendToFields":
-                        foreach (var x in GetTendToFieldsInteractions()) yield return x; break;
-                    case "cook": foreach (var x in GetCookInteractions()) yield return x; break;
+                    case "tendToFields": info = GetTendToFieldsInteraction(human); break;
+                    case "cook": {
+                            foreach (var interaction in GetCookInteractions()) {
+                                info = CheckInteraction(interaction, human);
+                                if (info != null) break;
+                            }
+                        }
+                        break;
                     case "harvestCotton":
-                        yield return new InteractionRestricted(Interaction.GatherResource,
-                        new List<InteractionRestriction>()
-                        {
-                            new InteractionRestrictionResource(Resource.Cotton),
+                    case "harvestApples": {
+                            InteractionRestricted interaction = new InteractionRestricted(Interaction.GatherResource,
+                               new List<InteractionRestriction>()
+                               {
+                            new InteractionRestrictionResource(specs[i] == "harvestCotton" ?  Resource.Cotton : Resource.Apple),
                             new InteractionRestrictionDesignation(Designation.GatherPlant)
-                        });
+                               });
+
+                            info = CheckInteraction(interaction, human);
+                        }
                         break;
 
-                    case "harvestApples":
-                        yield return new InteractionRestricted(Interaction.GatherResource,
-                        new List<InteractionRestriction>()
-                        {
-                        new InteractionRestrictionResource(Resource.Apple),
-                        new InteractionRestrictionDesignation(Designation.GatherPlant)
-                        }); break;
+                    case "careForAnimals": {
+                            foreach (var interactionType in new Interaction[] { Interaction.Butcher, Interaction.Tame, Interaction.Milk, Interaction.Shear }) {
+                                InteractionRestricted interaction = new InteractionRestricted(interactionType, interactionType == Interaction.Butcher ? new InteractionRestrictionAutoButcher() : null);
 
-                    case "careForAnimals":
-                        yield return new InteractionRestricted(Interaction.Butcher, new InteractionRestrictionAutoButcher());
-                        yield return new InteractionRestricted(Interaction.Tame);
-                        yield return new InteractionRestricted(Interaction.Milk);
-                        yield return new InteractionRestricted(Interaction.Shear);
+                                info = CheckInteraction(interaction, human);
+                                if (info != null) break;
+                            }
+                        }
                         break;
 
                     default:
-                        foreach (var x in GetOtherInteractions(p, specs[i])) yield return x; break;
+                        foreach (var x in GetOtherInteractions(p, specs[i])) {
+                            info = CheckInteraction(x, human);
+                            if (info != null) break;
+                        }
+                        break;
                 }
             }
+
+            return info;
         }
 
         private static IEnumerable<InteractionRestricted> GetCookInteractions() {
@@ -150,7 +151,7 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
             }
         }
 
-        private static IEnumerable<InteractionRestricted> GetTendToFieldsInteractions() {
+        private static InteractionInfo GetTendToFieldsInteraction(HumanAI human) {
             //Build a dictionary of ratios (NbOwned vs Capacity) so that we order the actions
             //By what is most needed.  i.e. if we have lots of tomatoes but no potatoes, we'll harvest potatoes first
             Dictionary<Resource, double> ratios = FieldsResources.ToDictionary(x => x, x => GetResourceRatio(x));
@@ -159,7 +160,6 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
             List<Resource> sortedFieldRes = new List<Resource>(FieldsResources);
             sortedFieldRes.Sort((x, y) => ratios[x].CompareTo(ratios[y]));
 
-            //We calculate a bonus so that if we're low on food we lower the priority of watering plants and removing dead plants
             bool lowOnFood = (GameState.Instance.GetResource(Resource.FoodRaw) + GameState.Instance.GetResource(Resource.FoodCooked)) < (5 * WorldScripts.Instance.humanManager.GetColonistCount());
 
             //If low on food, the healing plants and wheat will have the lowest priority
@@ -173,109 +173,148 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
 
 
             for (int r = 0; r < sortedFieldRes.Count; r++) {
-                InteractionRestrictionResource rr = new InteractionRestrictionResource(sortedFieldRes[r]);
-                InteractionRestrictionModule soilR = new InteractionRestrictionModule(typeof(SoilModule), true);
+                Vector3 position = human.GetPosition();
 
-                yield return new InteractionRestricted(
-                    Interaction.Sow,
-                    new List<InteractionRestriction>() { rr, soilR });
+                foreach (SoilModule soil in WorldScripts.Instance.furnitureFactory.GetFurnitureOwnedBy(WorldScripts.Instance.humanManager.colonyFaction)
+                    .Where(x => x.HasModule<SoilModule>() && x.IsValid() && x.IsBuilt()).Select(x => x.GetModule<SoilModule>())
+                    .Where(x => x.resourceName == sortedFieldRes[r].ToString().ToLower())
+                    .OrderBy(x => Vector3.Distance(position, x.parent.GetPosition()))) {
 
-                yield return new InteractionRestricted(
-                    Interaction.GatherResource,
-                    new List<InteractionRestriction>() { rr });
+                    foreach (var interaction in soil.GetInteractions(human, true, false)) {
+                        if (interaction.interaction != Interaction.RemovePlant &&
+                            !interaction.IsRestricted(soil.parent.GetInteractable(), human, true)) {
+                            return new InteractionInfo(interaction.interaction, soil.parent.GetInteractable(), interaction.restrictions, true, 50, false);
+                        }
+                    }
+                }
             }
 
-            yield return new InteractionRestricted(Interaction.WaterPlant);
-
-            //The original code only adds this interaction in winter but since we can have dead plants caused by
-            //bug infestations I add it for all seasons
-            yield return new InteractionRestricted(Interaction.RemoveDeadPlants);
+            return null;
         }
 
-        private static IEnumerable<InteractionRestricted> GetForesterInteractions(Profession p, List<String> specs) {
+        private static InteractionInfo GetForesterInteractions(Profession p, List<String> specs, HumanAI human) {
 
-            for (int i = 0; i < specs.Count; i++) {
+            InteractionInfo info = null;
+
+            for (int i = 0; i < specs.Count && info == null; i++) {
                 if (!p.HasSpecialization(specs[i])) continue;
 
                 switch (specs[i]) {
                     case "chopTrees":
-                        yield return new InteractionRestricted(Interaction.GatherResource,
-                            new List<InteractionRestriction>()
-                            {
+                    case "clearStumps":
+
+                        //If the colonist has both specializations, get the nearest tree
+                        if (p.HasSpecialization("chopTrees") && p.HasSpecialization("clearStumps")) {
+                            InteractionInfo treeInfo = CheckInteraction(new InteractionRestricted(Interaction.GatherResource,
+                                new List<InteractionRestriction>()
+                                {
                                 new InteractionRestrictionResource(Resource.Wood),
                                 new InteractionRestrictionDesignation(Designation.CutTree)
-                            });
+                                }), human);
+
+                            InteractionInfo stumpInfo = CheckInteraction(new InteractionRestricted(Interaction.ClearStumps,
+                                new List<InteractionRestriction>()
+                                {
+                                new InteractionRestrictionResource(Resource.Wood),
+                                new InteractionRestrictionDesignation(Designation.CutTree)
+                                }), human);
+
+                            if (treeInfo == null) info = stumpInfo;
+                            else if (stumpInfo == null) info = treeInfo;
+                            else {
+                                float distanceTree = Vector3.Distance(human.GetPosition(), treeInfo.interactable.GetWorldPosition());
+                                float distanceStump = Vector3.Distance(human.GetPosition(), stumpInfo.interactable.GetWorldPosition());
+
+                                if (distanceTree <= distanceStump)
+                                    info = treeInfo;
+                                else 
+                                    info = stumpInfo;                                
+                            }
+                        } else {
+
+                            info = CheckInteraction(new InteractionRestricted(specs[i] == "chopTrees" ? Interaction.GatherResource : Interaction.ClearStumps,
+                                new List<InteractionRestriction>()
+                                {
+                                new InteractionRestrictionResource(Resource.Wood),
+                                new InteractionRestrictionDesignation(Designation.CutTree)
+                                }), human);
+                        }                      
+
                         break;
 
                     case "growTrees":
-                        yield return new InteractionRestricted(Interaction.Sow,
+                        foreach(var type in new Interaction[] { Interaction.Sow, Interaction.Care }) {
+                            info = CheckInteraction(new InteractionRestricted(type,
                             new List<InteractionRestriction>()
                             {
                                 new InteractionRestrictionModule(typeof(GrowingSpotModule), true)
-                            });
+                            }), human);
 
-                        yield return new InteractionRestricted(Interaction.Care,
-                            new List<InteractionRestriction>()
-                            {
-                                new InteractionRestrictionModule(typeof(GrowingSpotModule), true)
-                            });
-                        break;
-
-                    case "clearStumps":
-                        yield return new InteractionRestricted(Interaction.ClearStumps,
-                            new List<InteractionRestriction>()
-                            {
-                                new InteractionRestrictionResource(Resource.Wood),
-                                new InteractionRestrictionDesignation(Designation.CutTree)
-                            });
+                            if (info != null) break;
+                        }
                         break;
 
                     default:
-                        foreach (var x in GetOtherInteractions(p, specs[i])) yield return x; break;
+                        foreach (var x in GetOtherInteractions(p, specs[i])) {
+                            info = CheckInteraction(x, human);
+                            if (info != null) break;
+                        }
+                        break;
                 }
             }
+
+            return info;
         }
 
-        private static IEnumerable<InteractionRestricted> GetMinerInteractions(Profession p, List<String> specs) {
+        private static InteractionInfo GetMinerInteractions(Profession p, List<String> specs, HumanAI human) {
+            InteractionInfo info = null;
 
-            for (int i = 0; i < specs.Count; i++) {
+            for (int i = 0; i < specs.Count && info == null; i++) {
                 if (!p.HasSpecialization(specs[i])) continue;
 
                 switch (specs[i]) {
                     case "mineStone":
-                        yield return new InteractionRestricted(Interaction.GatherResource,
+                        info = CheckInteraction(new InteractionRestricted(Interaction.GatherResource,
                             new List<InteractionRestriction>()
                             {
                                 new InteractionRestrictionResource(Resource.Stone),
                                 new InteractionRestrictionDesignation(Designation.Mine)
-                            });
+                            }), human);
                         break;
 
                     case "mineIron":
-                        yield return new InteractionRestricted(Interaction.GatherResource,
+                        info = CheckInteraction(new InteractionRestricted(Interaction.GatherResource,
                             new List<InteractionRestriction>()
                             {
                                 new InteractionRestrictionResource(Resource.IronOre),
                                 new InteractionRestrictionDesignation(Designation.Mine)
-                            });
+                            }), human);
                         break;
 
                     case "mineCrystal":
-                        yield return new InteractionRestricted(Interaction.GatherResource,
+                        info = CheckInteraction(new InteractionRestricted(Interaction.GatherResource,
                             new List<InteractionRestriction>()
                             {
                                 new InteractionRestrictionResource(Resource.Crystal),
                                 new InteractionRestrictionDesignation(Designation.Mine)
-                            });
+                            }), human);
                         break;
 
                     default:
-                        foreach (var x in GetOtherInteractions(p, specs[i])) yield return x; break;
+                        foreach (var x in GetOtherInteractions(p, specs[i])) {
+                            info = CheckInteraction(x, human);
+                            if (info != null) break;
+                        }
+                        break;
                 }
             }
+
+            return info;
         }
 
-        private static IEnumerable<InteractionRestricted> GetCraftsmanInteractions(Profession p, List<String> specs) {
+        private static InteractionInfo GetCraftsmanInteractions(Profession p, List<String> specs, HumanAI human) {
+            InteractionInfo info = null;
+
             for (int i = 0; i < specs.Count; i++) {
                 if (!p.HasSpecialization(specs[i])) continue;
 
@@ -285,22 +324,30 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
                     case "masonry":
                     case "forging":
                     case "weaving":
-                        yield return new InteractionRestricted(Interaction.Produce,
+                        info = CheckInteraction(new InteractionRestricted(Interaction.Produce,
                         new List<InteractionRestriction>()
                         {
                         new InteractionRestrictionProfessionSpecialization(specs[i]),
                         new InteractionRestrictionProfession(ProfessionType.Craftsman)
-                        });
+                        }), human);
                         break;
 
                     default:
-                        foreach (var x in GetOtherInteractions(p, specs[i])) yield return x; break;
+                        foreach (var x in GetOtherInteractions(p, specs[i])) {
+                            info = CheckInteraction(x, human);
+                            if (info != null) break;
+                        }
+                        break;
                 }
             }
+
+            return info;
         }
 
-        private static IEnumerable<InteractionRestricted> GetDoctorInteractions(Profession p, List<String> specs) {
-            for (int i = 0; i < specs.Count; i++) {
+        private static InteractionInfo GetDoctorInteractions(Profession p, List<String> specs, HumanAI human) {
+            InteractionInfo info = null;
+
+            for (int i = 0; i < specs.Count && info == null; i++) {
                 if (!p.HasSpecialization(specs[i])) continue;
 
                 switch (specs[i]) {
@@ -309,62 +356,79 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
                         orderedMeds.Sort((x, y) => GetResourceRatio(GameState.GetResourceByString(x)).CompareTo(GetResourceRatio(GameState.GetResourceByString(y))));
 
                         for (int r = 0; r < orderedMeds.Count; r++) {
-                            yield return new InteractionRestricted(Interaction.Produce,
+                            info = CheckInteraction(new InteractionRestricted(Interaction.Produce,
                             new List<InteractionRestriction>()
                             {
                                 new InteractionRestrictionProduction(new List<string>(){ orderedMeds[r] })
-                            });
+                            }), human);
                         }
                         break;
 
                     case "tendToPatients":
-                        yield return new InteractionRestricted(Interaction.TryFluTreatment);
-            yield return new InteractionRestricted(Interaction.GiveFood, new InteractionRestrictionFaction());
-            yield return new InteractionRestricted(Interaction.GiveHealingPotion, new InteractionRestrictionFaction());
-            yield return new InteractionRestricted(Interaction.BandageWounds, new InteractionRestrictionFaction());
-            yield return new InteractionRestricted(Interaction.SplintArm, new InteractionRestrictionFaction());
-            yield return new InteractionRestricted(Interaction.SplintLeg, new InteractionRestrictionFaction());
+                        foreach(var interaction in new Interaction[] { Interaction.TryFluTreatment, Interaction.GiveFood , Interaction.GiveHealingPotion, Interaction.BandageWounds, Interaction.SplintArm, Interaction.SplintLeg }) {
+                            info = CheckInteraction(new InteractionRestricted(interaction, 
+                                interaction == Interaction.TryFluTreatment ? null : new InteractionRestrictionFaction()), human);
+
+                            if (info != null) break;
+                        }
                         break;
 
                     case "buryDead":
-                        yield return new InteractionRestricted(Interaction.Bury, new InteractionRestrictionFaction());
+                        info = CheckInteraction(new InteractionRestricted(Interaction.Bury), human);
                         break;
 
                     case "brewBeer":
-                        yield return new InteractionRestricted(Interaction.Produce, new InteractionRestrictionProduction(new List<string>() { "beer" }));
+                        info = CheckInteraction(new InteractionRestricted(Interaction.Produce, new InteractionRestrictionProduction(new List<string>() { "beer" })), human);
                         break;
 
                     default:
-                        foreach (var x in GetOtherInteractions(p, specs[i])) yield return x; break;
+                        foreach (var x in GetOtherInteractions(p, specs[i])) {
+                            info = CheckInteraction(x, human);
+                            if (info != null) break;
+                        }
+                        break;
                 }
             }
+
+            return info;
         }
 
-        private static IEnumerable<InteractionRestricted> GetScholarInteractions(Profession p, List<String> specs) {
+        private static InteractionInfo GetScholarInteractions(Profession p, List<String> specs, HumanAI human) {
+            InteractionInfo info = null;
 
-            for (int i = 0; i < specs.Count; i++) {
+            for (int i = 0; i < specs.Count && info == null; i++) {
                 if (!p.HasSpecialization(specs[i])) continue;
 
                 switch (specs[i]) {
                     case "performResearch":
-                        yield return new InteractionRestricted(Interaction.Produce,
-                            new InteractionRestrictionProfession(ProfessionType.Scholar));
+                        info = CheckInteraction(new InteractionRestricted(Interaction.Produce,
+                            new InteractionRestrictionProfession(ProfessionType.Scholar)), human);
                         break;
 
                     case "mineCrystal":
-                        yield return new InteractionRestricted(Interaction.GatherResource,
-                            new InteractionRestrictionResource(Resource.Crystal));
+                        info = CheckInteraction(new InteractionRestricted(Interaction.GatherResource,
+                            new InteractionRestrictionResource(Resource.Crystal)), human);
                         break;
 
                     default:
-                        foreach (var x in GetOtherInteractions(p, specs[i])) yield return x; break;
+                        foreach (var x in GetOtherInteractions(p, specs[i])) {
+                            info = CheckInteraction(x, human);
+                            if (info != null) break;
+                        }
+                        break;
                 }
             }
+
+            return info;
         }
 
-        private static IEnumerable<InteractionRestricted> GetBuilderInteractions(Profession p, List<String> specs) {
-            yield return new InteractionRestricted(Interaction.Construct);
-            yield return new InteractionRestricted(Interaction.Deconstruct);
+        private static InteractionInfo GetBuilderInteractions(Profession p, List<String> specs, HumanAI human) {
+            InteractionInfo info = CheckInteraction(new InteractionRestricted(Interaction.Construct), human);
+            if(info == null) {
+                info = CheckInteraction(new InteractionRestricted(Interaction.Deconstruct), human);
+            }
+
+            return info;
         }
 
 
@@ -407,6 +471,29 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
             double ratio = nbOwned * 1.0 / nbMax;
 
             return ratio;
+        }
+
+        private static InteractionInfo CheckInteraction(InteractionRestricted interactionRestricted, HumanAI human) {
+            if (interactionRestricted.interaction == Interaction.Tame) {
+                foreach (HumanAI animal in human.faction.GetLivingHumans().Where(x => x.animal != null).OrderBy(x => x.animal.tameness)) {
+                    if (CheckInteraction(animal.GetInteractable(), interactionRestricted, human)) {
+                        return new InteractionInfo(interactionRestricted.interaction, animal.GetInteractable(), interactionRestricted.restrictions, true, 50, false);
+                    }
+                }
+                return null;
+            }
+
+            Interactable interactable = human.SearchForInteractableWithInteraction(interactionRestricted.interaction, 40f, interactionRestricted.restrictions, true);
+            if (interactable != null && interactable.IsValid()) {
+                return new InteractionInfo(interactionRestricted.interaction, interactable, interactionRestricted.restrictions, true, 50, false);
+            }
+            return null;
+        }
+
+        private static bool CheckInteraction(Interactable interactable, InteractionRestricted interactionRestricted, HumanAI human) {
+            if (!interactable.IsPossibleInteraction(interactionRestricted.interaction, human, true, false)) { return false; }
+            if (interactionRestricted.restrictions != null && interactionRestricted.restrictions.Any(x => x.IsRestrictedFast(interactable, interactionRestricted.interaction, human, true))) { return false; }
+            return true;
         }
     }
 }
