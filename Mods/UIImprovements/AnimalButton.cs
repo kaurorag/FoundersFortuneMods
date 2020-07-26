@@ -34,7 +34,7 @@ namespace WitchyMods.UIImprovements {
             this.GetComponent<Button>().interactable = animals.Count != 0;
 
             int limit = WorldScripts.Instance.humanManager.colonyFaction.GetAnimalSpeciesManager(this.HumanType).breedingLimit;
-            this.CountText.color = animals.Count > limit ? new Color(0.726f, 0.318f, 0.318f) : new Color(0.318f, 0.725f, 0.337f);
+            this.CountText.color = animals.Count > limit ? new Color(0.726f, 0.318f, 0.318f) : Color.white ;
         }
 
         public void OnClick() {
