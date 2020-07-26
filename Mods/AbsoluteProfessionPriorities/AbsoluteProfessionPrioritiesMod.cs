@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using HarmonyLib;
 using System.Reflection;
+using UnityEngine;
 
 namespace WitchyMods.AbsoluteProfessionPriorities {
     [Serializable]
@@ -18,15 +19,12 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
         [NonSerialized]
         public static AbsoluteProfessionPrioritiesMod Instance;
 
+        public float? buryColonistFailCooldown;
+
+
         public override void Load() {
-            try {
                 Harmony harmony = new Harmony("AbsoluteProfessionPriorities");
                 harmony.PatchAll();
-            }
-            catch (Exception ex) {
-                DebugLogger.Log(ex);
-                throw;
-            }
         }
 
         public override void Start() {
@@ -42,7 +40,8 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
                 }
             }
 
-            defaultPriorities.Add(ProfessionType.Builder, new List<string>());
+            if (!defaultPriorities.ContainsKey(ProfessionType.Builder))
+                defaultPriorities.Add(ProfessionType.Builder, new List<string>());
 
             //If it's null, then we either loaded a new game or a game that hadn't had the mod yet
             if (specializationPriorities == null) {
@@ -89,6 +88,10 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
         }
 
         public override void Update() {
+            if (buryColonistFailCooldown.HasValue) {
+                buryColonistFailCooldown -= Time.deltaTime;
+                if (buryColonistFailCooldown < 0) buryColonistFailCooldown = null;
+            }
         }
     }
 }

@@ -34,22 +34,22 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
 
             foreach (var p in human.professionManager.professions.Values.Where(x => x.priority > 0))
 
-            //For each priority (number of stars), starting by the highest to the lowest
-            foreach (var professionPriority in profs.Keys.OrderByDescending(x => x)) {
-                foreach (var profession in profs[professionPriority].OrderBy(x=> UnityEngine.Random.Range(0, profs[professionPriority].Count))) {
-                    if (profession.type == ProfessionType.Soldier ||
-                        profession.type == ProfessionType.NoJob)
-                        continue;
+                //For each priority (number of stars), starting by the highest to the lowest
+                foreach (var professionPriority in profs.Keys.OrderByDescending(x => x)) {
+                    foreach (var profession in profs[professionPriority].OrderBy(x => UnityEngine.Random.Range(0, profs[professionPriority].Count))) {
+                        if (profession.type == ProfessionType.Soldier ||
+                            profession.type == ProfessionType.NoJob)
+                            continue;
 
-                    if (!AbsoluteProfessionPrioritiesMod.Instance.specializationPriorities[human.GetID()].ContainsKey(profession.type))
-                        continue;
+                        if (!AbsoluteProfessionPrioritiesMod.Instance.specializationPriorities[human.GetID()].ContainsKey(profession.type))
+                            continue;
 
-                    __result = GetNextInteraction(__instance, human, profession);
-                    if (__result != null) {
-                        return false;
+                        __result = GetNextInteraction(__instance, human, profession);
+                        if (__result != null) {
+                            return false;
+                        }
                     }
                 }
-            }
 
             return false;
         }
@@ -177,7 +177,7 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
 
                 foreach (SoilModule soil in WorldScripts.Instance.furnitureFactory.GetFurnitureOwnedBy(WorldScripts.Instance.humanManager.colonyFaction)
                     .Where(x => x.HasModule<SoilModule>() && x.IsValid() && x.IsBuilt()).Select(x => x.GetModule<SoilModule>())
-                    .Where(x => x.resourceName == sortedFieldRes[r].ToString().ToLower())
+                    .Where(x => x.GetResource() == sortedFieldRes[r])
                     .OrderBy(x => Vector3.Distance(position, x.parent.GetPosition()))) {
 
                     foreach (var interactionRestricted in soil.GetInteractions(human, true, false)) {
@@ -229,8 +229,8 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
 
                                 if (distanceTree <= distanceStump)
                                     info = treeInfo;
-                                else 
-                                    info = stumpInfo;                                
+                                else
+                                    info = stumpInfo;
                             }
                         } else {
 
@@ -240,12 +240,12 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
                                 new InteractionRestrictionResource(Resource.Wood),
                                 new InteractionRestrictionDesignation(Designation.CutTree)
                                 }), human);
-                        }                      
+                        }
 
                         break;
 
                     case "growTrees":
-                        foreach(var type in new Interaction[] { Interaction.Sow, Interaction.Care }) {
+                        foreach (var type in new Interaction[] { Interaction.Sow, Interaction.Care }) {
                             info = CheckInteraction(new InteractionRestricted(type,
                             new List<InteractionRestriction>()
                             {
@@ -317,7 +317,7 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
         private static InteractionInfo GetCraftsmanInteractions(Profession p, List<String> specs, HumanAI human) {
             InteractionInfo info = null;
 
-            for (int i = 0; i < specs.Count; i++) {
+            for (int i = 0; i < specs.Count && info == null; i++) {
                 if (!p.HasSpecialization(specs[i])) continue;
 
                 switch (specs[i]) {
@@ -329,8 +329,8 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
                         info = CheckInteraction(new InteractionRestricted(Interaction.Produce,
                         new List<InteractionRestriction>()
                         {
-                        new InteractionRestrictionProfessionSpecialization(specs[i]),
-                        new InteractionRestrictionProfession(ProfessionType.Craftsman)
+                            new InteractionRestrictionProfessionSpecialization(specs[i]),
+                            new InteractionRestrictionProfession(ProfessionType.Craftsman)
                         }), human);
                         break;
 
@@ -367,8 +367,8 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
                         break;
 
                     case "tendToPatients":
-                        foreach(var interaction in new Interaction[] { Interaction.TryFluTreatment, Interaction.GiveFood , Interaction.GiveHealingPotion, Interaction.BandageWounds, Interaction.SplintArm, Interaction.SplintLeg }) {
-                            info = CheckInteraction(new InteractionRestricted(interaction, 
+                        foreach (var interaction in new Interaction[] { Interaction.TryFluTreatment, Interaction.GiveFood, Interaction.GiveHealingPotion, Interaction.BandageWounds, Interaction.SplintArm, Interaction.SplintLeg }) {
+                            info = CheckInteraction(new InteractionRestricted(interaction,
                                 interaction == Interaction.TryFluTreatment ? null : new InteractionRestrictionFaction()), human);
 
                             if (info != null) break;
@@ -376,7 +376,29 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
                         break;
 
                     case "buryDead":
-                        info = CheckInteraction(new InteractionRestricted(Interaction.Bury), human);
+                        //bury colonists
+                        info = CheckInteraction(new InteractionRestricted(Interaction.Bury, new InteractionRestrictionFaction()),
+                            human);
+
+                        if(info != null) {
+                            var filledInfo = AccessTools.Field(typeof(GraveModule), "filled");
+
+                            if (!WorldScripts.Instance.furnitureFactory.GetModules<GraveModule>().Any(x =>
+                                    !((bool)filledInfo.GetValue(x)))) {
+                                if (AbsoluteProfessionPrioritiesMod.Instance.buryColonistFailCooldown.HasValue) {
+                                    info = null;
+                                }
+                            } else
+                                AbsoluteProfessionPrioritiesMod.Instance.buryColonistFailCooldown = null;
+                        }
+                        
+                        if(info == null){
+                            //bury non-colonists
+                            info = CheckInteraction(new InteractionRestricted(Interaction.Bury, new List<InteractionRestriction>() {
+                                new InteractionRestrictionEmptyGrave(),
+                                new InteractionRestrictionFactionType(FactionType.Colony, false)}),
+                                human);
+                        } 
                         break;
 
                     case "brewBeer":
@@ -426,7 +448,7 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
 
         private static InteractionInfo GetBuilderInteractions(Profession p, List<String> specs, HumanAI human) {
             InteractionInfo info = CheckInteraction(new InteractionRestricted(Interaction.Construct), human);
-            if(info == null) {
+            if (info == null) {
                 info = CheckInteraction(new InteractionRestricted(Interaction.Deconstruct), human);
             }
 
@@ -475,7 +497,7 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
             return ratio;
         }
 
-        public static InteractionInfo CheckInteraction(InteractionRestricted interactionRestricted, HumanAI human) {
+        public static InteractionInfo CheckInteraction(InteractionRestricted interactionRestricted, HumanAI human, float distance = 40f) {
             if (interactionRestricted.interaction == Interaction.Tame) {
                 foreach (HumanAI animal in human.faction.GetLivingHumans().Where(x => x.animal != null).OrderBy(x => x.animal.tameness)) {
                     if (CheckInteraction(animal.GetInteractable(), interactionRestricted, human)) {
@@ -485,11 +507,17 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
                 return null;
             }
 
-            Interactable interactable = human.SearchForInteractableWithInteraction(interactionRestricted.interaction, 40f, interactionRestricted.restrictions, true);
+            Interactable interactable = SearchForInteractableWithInteraction(human, interactionRestricted.interaction, distance, interactionRestricted.restrictions, true);
+
             if (interactable != null && interactable.IsValid()) {
                 return new InteractionInfo(interactionRestricted.interaction, interactable, interactionRestricted.restrictions, true, 50, false);
             }
             return null;
+        }
+
+        public static Interactable SearchForInteractableWithInteraction(HumanAI human, Interaction interaction, float distance, List<InteractionRestriction> restrictions = null, bool probablyReachablesOnly = false, bool objectInteraction = false, Vector3 positionOverride = default(Vector3)) {
+            if (interaction == Interaction.Construct) { return human.SearchForInteractbleWithConstructPriority(interaction, distance, restrictions, probablyReachablesOnly, objectInteraction, positionOverride); }
+            return InteractableBookkeeperHelper.SearchForInteractablesWithInteraction(human, interaction, distance, restrictions, probablyReachablesOnly, objectInteraction, positionOverride).FirstOrDefault();
         }
 
         public static bool CheckInteraction(Interactable interactable, InteractionRestricted interactionRestricted, HumanAI human) {

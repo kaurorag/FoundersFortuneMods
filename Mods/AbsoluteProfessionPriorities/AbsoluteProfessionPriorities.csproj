@@ -87,6 +87,8 @@
       <Link>UnityUtils.cs</Link>
     </Compile>
     <Compile Include="AbsoluteProfessionPrioritiesMod.cs" />
+    <Compile Include="InteractableBookKeeperHelper.cs" />
+    <Compile Include="InteractionRestrictions.cs" />
     <Compile Include="ProfessionDetailPanelPatch.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SpecializationDetailsPanel.cs" />
