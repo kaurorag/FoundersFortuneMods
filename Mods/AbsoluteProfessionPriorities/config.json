@@ -1,6 +1,6 @@
 ﻿{
   "name": "AbsoluteProfessionPriorities",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "author": "Witchy",
   "website": "",
   "description": "
@@ -9,6 +9,14 @@ Colonist will always do tasks according to their profession priorities (number o
 Ever since the last update (13.0.09), tasks are no longer done in order of profession priorities.
 Instead, there's a bit of randomization in the logic.
 For those of you who prefer to always have 3 stars task be done before 2 stars tasks and so on, this mod is for you!
+
+[h1]New in 2.2.0[/h1]
+[list]
+[*]Farmers will no longer sow/harvest/water many plots in a row before choosing an other task.  They will do tasks in order of distance.
+This means that farmers will harvest a tile and re-sow it immediately then water it which makes them way more efficient.
+[*]Foresters will no longer go after either all trees or stumps before going to the next task.  They will select the nearest tree/stump to chop down.
+[*]Doctors now bury dead tikis/pirates automatically as long as there are empty graves.  If no empty graves remain, no alert will be displayed for non-colonist bodies.
+[/list]
 
 [h1]NEW FEATURE![/h1]
 From version 2.0 and onwards, you can now order each specialization (Sub task of a profession).
@@ -23,6 +31,7 @@ Check out the code for my BuildAsProfessionTask in order to know how!
 
 [h1]Changelog[/h1]
 [list]
+[*][b]2.2.0[/b]: Lots of logic changes.  See above.
 [*][b]2.1.0[/b]: Mades changes for compatibility with Alpha 14
 [*][b]2.0.7[/b]: Fixed issue where unchecking specializations would have no effect.
 [*][b]2.0.6[/b]: Fixed a display issue with the specialization list.

@@ -72,7 +72,7 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
             }
         }
 
-        private static Resource[] FieldsResources = new Resource[] { Resource.Tomato, Resource.Pumpkin, Resource.Potato, Resource.Strawberry, Resource.Wheat, Resource.HealingPlantCultivated };
+        private static Resource[] FieldsResources = new Resource[] { Resource.HealingPlantCultivated, Resource.Strawberry, Resource.Tomato, Resource.Pumpkin, Resource.Potato, Resource.Wheat };
         private static String[] CookedFood = new string[] { "bakedApple", "bakedPotato", "bakedTomato", "pumpkinStew", "potatoSoup", "fruitSalad", "bread", "strawberryCake", "appleStrudel" };
         private static String[] Meds = new string[] { "healingPotion", "medicine" };
 
