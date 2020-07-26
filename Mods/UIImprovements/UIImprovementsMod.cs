@@ -51,6 +51,7 @@ namespace WitchyMods.UIImprovements {
                 GameObject obj = GameObject.Instantiate(ModHandler.mods.gameObjects["AnimalCyclerPanel"], CanvasHandler.Instance.transform);
                 this.AnimalCyclerPanel = obj.GetComponent<AnimalCyclerPanel>();
                 this.AnimalCyclerPanel.Init();
+                obj.transform.SetSiblingIndex(0);
             }
         }
 

@@ -59,10 +59,9 @@ namespace WitchyMods.UIImprovements {
 
                 if (furniture != null) {
                     OwnershipModule ownershipModule = furniture.GetModule<OwnershipModule>();
-                    if (ownershipModule == null && OldOwner != null)
+                    if (ownershipModule == null)
                         OldOwner = null;
                     else if (ownershipModule.owner != OldOwner) {
-                        EquipmentDescription desc = Equipment.GetDescriptions()[EquipmentName];
                         OldOwner = ownershipModule.owner;
                     }
 
