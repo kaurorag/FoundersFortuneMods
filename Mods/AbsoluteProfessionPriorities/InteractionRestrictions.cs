@@ -18,7 +18,7 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
             var filledInfo = AccessTools.Field(typeof(GraveModule), "filled");
 
             if (!WorldScripts.Instance.furnitureFactory.GetModules<GraveModule>().Any(x =>
-                !((bool)filledInfo.GetValue(x)))) {
+                !((bool)filledInfo.GetValue(x)) && x.parent.IsBuilt())) {
                 return true;
             }
 

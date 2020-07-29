@@ -1,17 +1,15 @@
-﻿using System;
+﻿using HarmonyLib;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using HarmonyLib;
-using System.Reflection;
 using UnityEngine;
 
 namespace WitchyMods.AbsoluteProfessionPriorities {
     [Serializable]
     public class AbsoluteProfessionPrioritiesMod : Mod {
-        //[humanId][ProfessionType][specializations] (ordered by priority where 0=most important]
+
         public Dictionary<long, Dictionary<ProfessionType, List<String>>> specializationPriorities = new Dictionary<long, Dictionary<ProfessionType, List<string>>>();
+        public Dictionary<long, Dictionary<SubSpecialization, bool>> subSpecializations = new Dictionary<long, Dictionary<SubSpecialization, bool>>();
 
         [NonSerialized]
         private static Dictionary<ProfessionType, List<String>> defaultPriorities = new Dictionary<ProfessionType, List<string>>();
@@ -23,8 +21,8 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
 
 
         public override void Load() {
-                Harmony harmony = new Harmony("AbsoluteProfessionPriorities");
-                harmony.PatchAll();
+            Harmony harmony = new Harmony("AbsoluteProfessionPriorities");
+            harmony.PatchAll();
         }
 
         public override void Start() {
@@ -57,6 +55,10 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
                 specializationPriorities.Remove(removedId);
             }
 
+            foreach (var removedId in subSpecializations.Keys.Where(x => !humanIds.Contains(x)).ToArray()) {
+                subSpecializations.Remove(removedId);
+            }
+
             //Init all of the IDs
             foreach (var id in humanIds) {
                 InitHuman(id);
@@ -69,6 +71,14 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
             //If we don't have this id in the dictionnary, add it
             if (!specializationPriorities.ContainsKey(id)) {
                 specializationPriorities.Add(id, new Dictionary<ProfessionType, List<string>>());
+            }
+
+            if (!subSpecializations.ContainsKey(id))
+                subSpecializations.Add(id, GetSubSpecializations().ToDictionary(x=>x, x=>true));
+            else {
+                foreach(var missingSub in GetSubSpecializations().Where(x => !subSpecializations[id].ContainsKey(x))) {
+                    subSpecializations[id].Add(missingSub, true);
+                }
             }
 
             foreach (var profession in defaultPriorities.Keys) {
@@ -93,5 +103,31 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
                 if (buryColonistFailCooldown < 0) buryColonistFailCooldown = null;
             }
         }
+
+        public static List<SubSpecialization> GetSubSpecializations() {
+            List<SubSpecialization> subs = new List<SubSpecialization>();
+
+            foreach (SubSpecialization sub in Enum.GetValues(typeof(SubSpecialization)))
+                subs.Add(sub);
+
+            return subs;
+        }
+    }
+
+    public enum SubSpecialization {
+        TendFields_Tomatoes,
+        TendFields_Potatoes,
+        TendFields_Strawberries,
+        TendFields_Wheat,
+        TendFields_Pumpkins,
+        TendFields_HealingPlants,
+        AnimalCare_Butcher,
+        AnimalCare_Shear,
+        AnimalCare_Milk,
+        PlantCare_Apples,
+        PlantCare_Cotton,
+        Cook_CampfireFood,
+        Cook_KitchenFood,
+        Cook_BakeryFood
     }
 }

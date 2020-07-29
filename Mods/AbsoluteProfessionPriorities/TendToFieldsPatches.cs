@@ -16,7 +16,7 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
         [HarmonyPrefix]
         private static bool GetInteractionEnumerable_Prefix(Interaction interaction, YieldMicroInteraction __instance, ref IEnumerable<YieldResult> __result) {
             YieldMicroInteractionHelper helper = new YieldMicroInteractionHelper(__instance);
-            __result = helper.New_GetInteractionEnumerable(interaction);
+            __result = helper.StartGetInteractionEnumerable(interaction);
 
             return __result == null;
         }

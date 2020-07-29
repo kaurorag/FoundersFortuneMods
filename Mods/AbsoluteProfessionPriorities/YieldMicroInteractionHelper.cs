@@ -105,6 +105,22 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
             return (YieldResult)AccessTools.Method(y.GetType(), "ObjectInteract").Invoke(y, new object[] { objectToInteractWith });
         }
 
+        public IEnumerable<YieldResult> Butcher() {
+            return AccessTools.Method(y.GetType(), "Butcher").Invoke(y, new object[] { }) as IEnumerable<YieldResult>;
+        }
+
+        public IEnumerable<YieldResult> Milk() {
+            return AccessTools.Method(y.GetType(), "Milk").Invoke(y, new object[] { }) as IEnumerable<YieldResult>;
+        }
+
+        public IEnumerable<YieldResult> Shear() {
+            return AccessTools.Method(y.GetType(), "Shear").Invoke(y, new object[] { }) as IEnumerable<YieldResult>;
+        }
+
+        public IEnumerable<YieldResult> Tame() {
+            return AccessTools.Method(y.GetType(), "Tame").Invoke(y, new object[] { }) as IEnumerable<YieldResult>;
+        }
+
         public void TurnToTransform() {
             AccessTools.Method(typeof(YieldMicroInteraction), "TurnToTransform").Invoke(y, new object[] { });
         }
@@ -114,8 +130,6 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
         }
 
         //Custom
-        private int iteration { get; set; } = 0;
-
         public void New_Continue() {
             var info = WorkInteractionControllerPatch.GetTendToFieldsInteraction(human);
             human.AbortInteractionAt(0, false);
@@ -186,16 +200,46 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
             yield return YieldResult.Completed;
         }
 
-        public IEnumerable<YieldResult> New_GetInteractionEnumerable(Interaction interaction) {
-            this.iteration = 0;
+        public IEnumerable<YieldResult> New_Butcher() {
+            foreach (var x in LockAnimal()) yield return x;
+            foreach (var x in Butcher()) yield return x;
+        }
+
+        public IEnumerable<YieldResult> New_Milk() {
+            foreach (var x in LockAnimal()) yield return x;
+            foreach (var x in Milk()) yield return x;
+        }
+
+        public IEnumerable<YieldResult> New_Shear() {
+            foreach (var x in LockAnimal()) yield return x;
+            foreach (var x in Shear()) yield return x;
+        }
+
+        public IEnumerable<YieldResult> New_Tame() {
+            foreach (var x in LockAnimal()) yield return x;
+            foreach (var x in Tame()) yield return x;
+        }
+
+        public IEnumerable<YieldResult> StartGetInteractionEnumerable(Interaction interaction) {
 
             switch (interaction) {
                 case TendToFieldsInteraction: return ContinueInteraction(New_TendToFields(), 20f);
+                case Interaction.ClearStumps:
                 case Interaction.GatherResource: if (InteractionInfo.isContinuationOrSubtask) return WorkOnFurniture(); else return null;
                 case Interaction.WaterPlant: return New_WaterPlantCustom();
+                case Interaction.Tame: return New_Tame();
+                case Interaction.Butcher: return New_Butcher();
+                case Interaction.Shear: return New_Shear();
+                case Interaction.Milk:  return New_Milk();
             }
 
             return null;
+        }
+
+        private IEnumerable<YieldResult> LockAnimal() {
+            HumanAI partner = InteractionTarget.GetPrimaryHolder<HumanAI>();
+            if (partner.animal != null)
+                yield return LockInteraction();
         }
 
         public YieldMicroInteraction New_Handle() {

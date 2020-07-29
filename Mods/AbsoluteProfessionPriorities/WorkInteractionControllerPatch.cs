@@ -24,6 +24,10 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
             if (human.IsLockedUp() || !human.WillWorkAutomatically() || human.IsLazy() || human.faction.GetFactionType() != FactionType.Colony || human.controlMode == ControlMode.Combat)
                 return false;
 
+            //Don't override manual interactions
+            InteractionInfo currentInteraction = human.GetCurrentInteractionInfo();
+            if (currentInteraction != null && !currentInteraction.issuedByAI) return false;
+
             //Init the human in case it's new
             AbsoluteProfessionPrioritiesMod.Instance.InitHuman(human.GetID());
 
@@ -161,19 +165,31 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
             sortedFieldRes.Sort((x, y) => ratios[x].CompareTo(ratios[y]));
 
             bool lowOnFood = (GameState.Instance.GetResource(Resource.FoodRaw) + GameState.Instance.GetResource(Resource.FoodCooked)) < (5 * WorldScripts.Instance.humanManager.GetColonistCount());
+            Vector3 position = human.GetPosition();
 
             //If low on food, the healing plants and wheat will have the lowest priority
             //Since they're not edible raw foods
             if (lowOnFood) {
                 sortedFieldRes.Remove(Resource.HealingPlantCultivated);
                 sortedFieldRes.Remove(Resource.Wheat);
+
+                foreach (Resource edibleRes in sortedFieldRes) {
+                    foreach (SoilModule soil in WorldScripts.Instance.furnitureFactory.GetFurnitureOwnedBy(WorldScripts.Instance.humanManager.colonyFaction)
+                    .Where(x => x.HasModule<SoilModule>() && x.IsValid() && x.IsBuilt()).Select(x => x.GetModule<SoilModule>())
+                    .Where(x => x.GetResource() == edibleRes && 
+                    ((SoilModule.PlantStage)AccessTools.Field(x.GetType(), "plantStage").GetValue(x)) == SoilModule.PlantStage.Grown)
+                    .OrderBy(x => Vector3.Distance(position, x.parent.GetPosition()))) {
+                        return new InteractionInfo(Interaction.GatherResource, soil.parent.GetInteractable(), null, true, 50, false);
+                    }
+                }
+
                 sortedFieldRes.Add(Resource.HealingPlantCultivated);
                 sortedFieldRes.Add(Resource.Wheat);
             }
 
 
             for (int r = 0; r < sortedFieldRes.Count; r++) {
-                Vector3 position = human.GetPosition();
+
 
                 foreach (SoilModule soil in WorldScripts.Instance.furnitureFactory.GetFurnitureOwnedBy(WorldScripts.Instance.humanManager.colonyFaction)
                     .Where(x => x.HasModule<SoilModule>() && x.IsValid() && x.IsBuilt()).Select(x => x.GetModule<SoilModule>())
@@ -211,7 +227,7 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
                                 new List<InteractionRestriction>()
                                 {
                                 new InteractionRestrictionResource(Resource.Wood),
-                                new InteractionRestrictionDesignation(Designation.CutTree)
+                                new InteractionRestrictionDesignation(Designation.CutTree), 
                                 }), human);
 
                             InteractionInfo stumpInfo = CheckInteraction(new InteractionRestricted(Interaction.ClearStumps,
