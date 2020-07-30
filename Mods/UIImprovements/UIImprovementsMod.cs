@@ -41,18 +41,16 @@ namespace WitchyMods.UIImprovements {
             Instance = this;
             _TimerTextTemplate = Localization.GetText("witchy_UIImprovements_MigrationTimer");
 
-            if (AnimalCyclerPanel != null) {
-                DebugLogger.Log("Panel isn't null!!");
-            }
+            GameObject obj = GameObject.Instantiate(ModHandler.mods.gameObjects["AnimalCyclerPanel"], CanvasHandler.Instance.transform);
+            this.AnimalCyclerPanel = obj.GetComponent<AnimalCyclerPanel>();
+            this.AnimalCyclerPanel.Init();
 
-            this.AnimalCyclerPanel = CanvasHandler.Instance.GetComponentInChildren<AnimalCyclerPanel>();
+            obj.transform.SetSiblingIndex(CanvasHandler.Instance.transform.Find("TooltipPanel").GetSiblingIndex() - 1);
 
-            if (this.AnimalCyclerPanel == null) {
-                GameObject obj = GameObject.Instantiate(ModHandler.mods.gameObjects["AnimalCyclerPanel"], CanvasHandler.Instance.transform);
-                this.AnimalCyclerPanel = obj.GetComponent<AnimalCyclerPanel>();
-                this.AnimalCyclerPanel.Init();
-                obj.transform.SetSiblingIndex(0);
-            }
+            GameObject dayTimePanelObj = GameObject.Instantiate(ModHandler.mods.gameObjects["DayTimePanel"],
+                CanvasHandler.Instance.transform.Find("TopPanel"));
+
+            dayTimePanelObj.transform.SetSiblingIndex(CanvasHandler.Instance.transform.Find("TooltipPanel").GetSiblingIndex() - 1);
         }
 
         public override void Update() {

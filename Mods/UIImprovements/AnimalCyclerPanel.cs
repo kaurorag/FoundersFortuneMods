@@ -16,6 +16,7 @@ namespace WitchyMods.UIImprovements {
 
         public GameObject AnimalButtonTemplate;
 
+#if !MODKIT
         private List<AnimalButton> animalButtons = new List<AnimalButton>();
 
         public void Init() {
@@ -36,5 +37,6 @@ namespace WitchyMods.UIImprovements {
                 btn.UpdateUI();
             }
         }
+#endif
     }
 }

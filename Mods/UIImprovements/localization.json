@@ -55,5 +55,8 @@
   },
   "witchy_UIImprovements_GrowingSpot_NextCare": {
     "english": "Time until next care: {0:00}:{1:00}"
+  },
+  "day": {
+    "english": "Day"
   }
 }
