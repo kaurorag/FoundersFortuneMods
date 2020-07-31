@@ -8,11 +8,7 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
     [Serializable]
     public class AbsoluteProfessionPrioritiesMod : Mod {
 
-        public Dictionary<long, Dictionary<ProfessionType, List<String>>> specializationPriorities = new Dictionary<long, Dictionary<ProfessionType, List<string>>>();
-        public Dictionary<long, Dictionary<SubSpecialization, bool>> subSpecializations = new Dictionary<long, Dictionary<SubSpecialization, bool>>();
-
-        [NonSerialized]
-        private static Dictionary<ProfessionType, List<String>> defaultPriorities = new Dictionary<ProfessionType, List<string>>();
+        public Dictionary<long, Dictionary<ProfessionType, Dictionary<string, Specialization>>> ColonistsData;
 
         [NonSerialized]
         public static AbsoluteProfessionPrioritiesMod Instance;
@@ -28,73 +24,82 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
         public override void Start() {
             Instance = this;
 
-            //Prepare the default dictionary
-            foreach (var spec in ModHandler.mods.professionSpecializations.Values) {
-                foreach (ProfessionType profession in spec.professionNames.Select(x => Enum.Parse(typeof(ProfessionType), x, true))) {
-                    if (!defaultPriorities.ContainsKey(profession))
-                        defaultPriorities.Add(profession, new List<string>());
-
-                    defaultPriorities[profession].Add(spec.name);
-                }
-            }
-
-            if (!defaultPriorities.ContainsKey(ProfessionType.Builder))
-                defaultPriorities.Add(ProfessionType.Builder, new List<string>());
-
-            //If it's null, then we either loaded a new game or a game that hadn't had the mod yet
-            if (specializationPriorities == null) {
-                specializationPriorities = new Dictionary<long, Dictionary<ProfessionType, List<string>>>();
-            }
+            if (this.ColonistsData == null)
+                this.ColonistsData = new Dictionary<long, Dictionary<ProfessionType, Dictionary<string, Specialization>>>();
 
             //Get all of the IDs of the current colonists
             HumanManager humanManager = WorldScripts.Instance.humanManager;
-            List<long> humanIds = humanManager.GetHumans().Where(x => x.faction.GetFactionType() == FactionType.Colony && x.humanType == HumanType.Colonist).Select(x => x.GetID()).ToList();
+            List<HumanAI> colonists = humanManager.colonyFaction.GetLivingHumanoids().ToList();
 
             //Remove all of the saved IDs that are not in the colony anymore
-            foreach (var removedId in specializationPriorities.Keys.Where(x => !humanIds.Contains(x)).ToArray()) {
-                specializationPriorities.Remove(removedId);
-            }
-
-            foreach (var removedId in subSpecializations.Keys.Where(x => !humanIds.Contains(x)).ToArray()) {
-                subSpecializations.Remove(removedId);
+            foreach (var removedId in this.ColonistsData.Keys.Where(x => !colonists.Any(y=>y.GetID() ==x)).ToArray()) {
+                this.ColonistsData.Remove(removedId);
             }
 
             //Init all of the IDs
-            foreach (var id in humanIds) {
-                InitHuman(id);
+            foreach (var colonist in colonists) {
+                InitColonist(colonist);
             }
         }
 
-        public void InitHuman(long id) {
-            HumanManager humanManager = WorldScripts.Instance.humanManager;
+        public void InitColonist(HumanAI human) {
 
-            //If we don't have this id in the dictionnary, add it
-            if (!specializationPriorities.ContainsKey(id)) {
-                specializationPriorities.Add(id, new Dictionary<ProfessionType, List<string>>());
-            }
+            var descriptors = GetSpecializationDescriptors();
+            long id = human.GetID();
 
-            if (!subSpecializations.ContainsKey(id))
-                subSpecializations.Add(id, GetSubSpecializations().ToDictionary(x=>x, x=>true));
+            if (!ColonistsData.ContainsKey(id))
+                this.ColonistsData.Add(id, new Dictionary<ProfessionType, Dictionary<string, Specialization>>());
             else {
-                foreach(var missingSub in GetSubSpecializations().Where(x => !subSpecializations[id].ContainsKey(x))) {
-                    subSpecializations[id].Add(missingSub, true);
+                foreach (var profession in this.ColonistsData[id].Keys.ToArray().Where(x => !descriptors.ContainsKey(x)))
+                    this.ColonistsData[id].Remove(profession);
+            }            
+
+            foreach(var profession in descriptors.Keys.ToArray()) {
+                InitColonistForProfession(human, profession, descriptors[profession], this.ColonistsData[id]);
+            }            
+        }
+
+        private void InitColonistForProfession(HumanAI human, ProfessionType profession, 
+            Dictionary<string, SpecializationDescriptor> descriptors,
+            Dictionary<ProfessionType, Dictionary<string, Specialization>> profSpecs) {
+
+            if (!profSpecs.ContainsKey(profession))
+                profSpecs.Add(profession, new Dictionary<string, Specialization>());
+            else {
+                foreach (var specName in profSpecs[profession].Keys.ToArray().Where(x => !descriptors.ContainsKey(x)))
+                    profSpecs[profession].Remove(specName);
+            }
+
+            foreach (var specName in descriptors.Keys.ToArray()) {
+                InitColonistForSpecialization(human, specName, descriptors[specName], profSpecs[profession]);
+            }
+        }
+
+        private void InitColonistForSpecialization(HumanAI human, string specName, 
+            SpecializationDescriptor desc, 
+            Dictionary<string, Specialization> specs) {
+
+            if (!specs.ContainsKey(specName)) {
+                specs.Add(specName, desc.ToSpecialization(human,
+                    specs.Count));
+            } else {
+                foreach (var subSpecName in specs[specName].SubSpecializations.Keys.ToArray()
+                    .Where(x => !desc.SubSpecializations.Keys.Contains(x))) {
+                    specs[specName].SubSpecializations.Remove(subSpecName);
                 }
             }
 
-            foreach (var profession in defaultPriorities.Keys) {
-                if (!specializationPriorities[id].ContainsKey(profession)) {
-                    specializationPriorities[id].Add(profession, new List<string>());
-                }
-
-                //Remove all specializations that don't exist anymore
-                specializationPriorities[id][profession].RemoveAll(x => !defaultPriorities[profession].Contains(x));
-
-                //Add the missing ones
-                foreach (var spec in defaultPriorities[profession]) {
-                    if (!specializationPriorities[id][profession].Contains(spec))
-                        specializationPriorities[id][profession].Add(spec);
-                }
+            foreach (var subSpecName in desc.SubSpecializations.Keys.ToArray()) {
+                InitColonistForSubSpecialization(human, subSpecName, desc.SubSpecializations[subSpecName], specs[specName]);
             }
+        }
+
+        private void InitColonistForSubSpecialization(HumanAI human, string subSpecName, 
+            SubSpecializationDescriptor desc, Specialization spec) {
+
+            if (!spec.SubSpecializations.ContainsKey(subSpecName))
+                spec.SubSpecializations.Add(subSpecName,
+                    desc.ToSubSpecialization(spec.SubSpecializations.Count));
         }
 
         public override void Update() {
@@ -104,30 +109,74 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
             }
         }
 
-        public static List<SubSpecialization> GetSubSpecializations() {
-            List<SubSpecialization> subs = new List<SubSpecialization>();
+        public static Dictionary<ProfessionType, Dictionary<string,SpecializationDescriptor>> GetSpecializationDescriptors() {
+            Dictionary<ProfessionType, Dictionary<string, SpecializationDescriptor>> descriptors = new Dictionary<ProfessionType, Dictionary<string, SpecializationDescriptor>>();
 
-            foreach (SubSpecialization sub in Enum.GetValues(typeof(SubSpecialization)))
-                subs.Add(sub);
+            List<string> subSpecializations = GetSubSpecializations();
 
-            return subs;
+            foreach(ProfessionType profession in Enum.GetValues(typeof(ProfessionType))) {
+                if (profession == ProfessionType.NoJob || profession == ProfessionType.Soldier) continue;
+
+                descriptors.Add(profession, new Dictionary<string, SpecializationDescriptor>());
+
+                foreach(var spec in ModHandler.mods.professionSpecializations.Values
+                    .Where(x=>x.professionNames.Contains(profession.ToString().ToLower()))) {
+                    descriptors[profession].Add(spec.name, new SpecializationDescriptor(spec.name));
+
+                    foreach(var subName in subSpecializations.Where(x => x.StartsWith($"{profession}_{spec.name}_", StringComparison.InvariantCultureIgnoreCase))) {
+                        descriptors[profession][spec.name].SubSpecializations.Add(subName, new SubSpecializationDescriptor(subName));
+                    }
+
+                    switch (spec.name) {
+                        case "tendToFields":
+                        case "cook":
+                        case "careForAnimals":
+                        case "produceMedicine":
+                            descriptors[profession][spec.name].CanAutoManageSubSpecializations = true;
+                            break;
+
+                        default:
+                            descriptors[profession][spec.name].CanAutoManageSubSpecializations = false;
+                            break;
+                    }
+                }
+            }
+
+            return descriptors;
         }
-    }
 
-    public enum SubSpecialization {
-        TendFields_Tomatoes,
-        TendFields_Potatoes,
-        TendFields_Strawberries,
-        TendFields_Wheat,
-        TendFields_Pumpkins,
-        TendFields_HealingPlants,
-        AnimalCare_Butcher,
-        AnimalCare_Shear,
-        AnimalCare_Milk,
-        PlantCare_Apples,
-        PlantCare_Cotton,
-        Cook_CampfireFood,
-        Cook_KitchenFood,
-        Cook_BakeryFood
+        public static List<string> GetSubSpecializations() {
+            return new List<string>() {
+                //Farmer
+                "Farmer_TendToFields_Tomato", 
+                "Farmer_TendToFields_Potato", 
+                "Farmer_TendToFields_Strawberry", 
+                "Farmer_TendToFields_Wheat", 
+                "Farmer_TendToFields_Pumpkin",
+                "Farmer_TendToFields_HealingPlantCultivated", 
+
+                "Farmer_Cook_CampireFire", 
+                "Farmer_Cook_Kitchen", 
+                "Farmer_Cook_Bakery", 
+
+                "Farmer_CareForAnimals_Butcher", 
+                "Farmer_CareForAnimals_Shear", 
+                "Farmer_CareForAnimals_Milk", 
+                "Farmer_CareForAnimals_Tame",
+
+                "Forester_ChopTrees_Stumps",
+                "Forester_ChopTrees_Trees",
+
+                "Forester_GrowTrees_PineTrees",
+                "Forester_GrowTrees_Apples", 
+                "Forester_GrowTrees_Cotton", 
+
+                "Doctor_ProduceMedicine_FluVaccines", 
+                "Doctor_ProduceMedicine_HealingPotions", 
+
+                "Scholar_PerformResearch_BookStand", 
+                "Scholar_PerformResearch_ScrollStand"
+            };
+        }
     }
 }

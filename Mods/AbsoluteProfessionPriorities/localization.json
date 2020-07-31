@@ -1,0 +1,80 @@
+﻿{
+  "-1": {
+    "english": "Tend to fields"
+  },
+  "professionSpecialization_buildFields": {
+    "english": "Build Fields"
+  },
+  "professionSpecialization_buildFurnitures": {
+    "english": "Build Furnitures"
+  },
+  "professionSpecialization_buildStructures": {
+    "english": "Build Structures"
+  },
+  "subSpecialization_Farmer_TendToFields_Tomato": {
+    "english": "Tomatoes"
+  },
+  "subSpecialization_Farmer_TendToFields_Potato": {
+    "english": "Potatoes"
+  },
+  "subSpecialization_Farmer_TendToFields_Strawberry": {
+    "english": "Strawberries"
+  },
+  "subSpecialization_Farmer_TendToFields_Wheat": {
+    "english": "Wheat"
+  },
+  "subSpecialization_Farmer_TendToFields_Pumpkin": {
+    "english": "Pumpkins"
+  },
+  "subSpecialization_Farmer_TendToFields_HealingPlantCultivated": {
+    "english": "Healing Plants"
+  },
+  "subSpecialization_Farmer_Cook_Campire": {
+    "english": "At Campfire"
+  },
+  "subSpecialization_Farmer_Cook_Kitchen": {
+    "english": "At Kitchen"
+  },
+  "subSpecialization_Farmer_Cook_Bakery": {
+    "english": "At Bakery"
+  },
+  "subSpecialization_Farmer_CareForAnimals_Butcher": {
+    "english": "Butcher"
+  },
+  "subSpecialization_Farmer_CareForAnimals_Shear": {
+    "english": "Shear"
+  },
+  "subSpecialization_Farmer_CareForAnimals_Milk": {
+    "english": "Milk"
+  },
+  "subSpecialization_Farmer_CareForAnimals_Tame": {
+    "english": "Tame"
+  },
+  "subSpecialization_Forester_ChopTrees_Trees": {
+    "english": "Mature Trees"
+  },
+  "subSpecialization_Forester_ChopTrees_Stumps": {
+    "english": "Stumps"
+  },
+  "subSpecialization_Forester_GrowTrees_PineTrees": {
+    "english": "Pine Trees"
+  },
+  "subSpecialization_Forester_GrowTrees_Apples": {
+    "english": "Apple Trees"
+  },
+  "subSpecialization_Forester_GrowTrees_Cotton": {
+    "english": "Cotton Plants"
+  },
+  "subSpecialization_Doctor_ProduceMedicine_FluVaccines": {
+    "english": "Flu Vaccines"
+  },
+  "subSpecialization_Doctor_ProduceMedicine_HealingPotions": {
+    "english": "Healing Potions"
+  },
+  "subSpecialization_Scholar_PerformResearch_BookStand": {
+    "english": "At Book Stand"
+  },
+  "subSpecialization_Scholar_PerformResearch_ScrollStand": {
+    "english": "At Scroll Stand"
+  }
+}

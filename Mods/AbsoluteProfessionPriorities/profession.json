@@ -1,0 +1,16 @@
+﻿{
+  "specializations": {
+    "buildFields": {
+      "professionNames": [ "builder" ],
+      "requiredSkill": ""
+    },
+    "buildFurnitures": {
+      "professionNames": [ "builder" ],
+      "requiredSkill": ""
+    },
+    "buildStructures": {
+        "professionNames": [ "builder" ],
+        "requiredSkill": ""
+    }
+  }
+}

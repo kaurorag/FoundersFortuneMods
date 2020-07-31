@@ -34,9 +34,15 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
         private static bool Continue_Prefix(YieldMicroInteraction __instance, float distance) {
             YieldMicroInteractionHelper helper = new YieldMicroInteractionHelper(__instance);
 
-            if (helper.Interaction == Interaction.Sow) return false;
+            switch (helper.Interaction) {
+                case Interaction.Sow: if (helper.InteractionInfo.isContinuationOrSubtask) return false;  break;
+                case YieldMicroInteractionHelper.TendToFieldsInteraction: helper.ContinueTendToFields(); return false;
+                case Interaction.Construct: break;
+            }
+
+            if (helper.Interaction == Interaction.Sow && helper.InteractionInfo.isContinuationOrSubtask) return false;
             else if (helper.Interaction == YieldMicroInteractionHelper.TendToFieldsInteraction) {
-                helper.New_Continue();
+                helper.ContinueTendToFields();
                 return false;
             }
 

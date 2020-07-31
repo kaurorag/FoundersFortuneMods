@@ -121,6 +121,10 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
             return AccessTools.Method(y.GetType(), "Tame").Invoke(y, new object[] { }) as IEnumerable<YieldResult>;
         }
 
+        public IEnumerable<YieldResult> Construct() {
+            return AccessTools.Method(y.GetType(), "Construct").Invoke(y, new object[] { }) as IEnumerable<YieldResult>;
+        }
+
         public void TurnToTransform() {
             AccessTools.Method(typeof(YieldMicroInteraction), "TurnToTransform").Invoke(y, new object[] { });
         }
@@ -130,11 +134,16 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
         }
 
         //Custom
-        public void New_Continue() {
-            var info = WorkInteractionControllerPatch.GetTendToFieldsInteraction(human);
+        public void ContinueTendToFields() {
             human.AbortInteractionAt(0, false);
-            if (info != null) {
-                human.SetCurrentTask(info);
+            Specialization spec = AbsoluteProfessionPrioritiesMod.Instance.ColonistsData[human.GetID()][ProfessionType.Farmer]["tendToFields"];
+            if (spec.Active) {
+                foreach (var info in WorkInteractionControllerPatch.GetTendToFieldsInteraction(human, spec)) {
+                    if (info != null) {
+                        human.SetCurrentTask(info);
+                        break;
+                    }
+                }
             }
         }
 
@@ -230,7 +239,7 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
                 case Interaction.Tame: return New_Tame();
                 case Interaction.Butcher: return New_Butcher();
                 case Interaction.Shear: return New_Shear();
-                case Interaction.Milk:  return New_Milk();
+                case Interaction.Milk: return New_Milk();
             }
 
             return null;
@@ -246,7 +255,7 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
             YieldResult result;
             YieldMicroInteraction resultHandle = y.Handle(out result) as YieldMicroInteraction;
 
-            if(result == YieldResult.Failed && this.Interaction == Interaction.Bury && 
+            if (result == YieldResult.Failed && this.Interaction == Interaction.Bury &&
                 this.InteractionInfo.restrictions != null &&
                 this.InteractionInfo.restrictions.OfType<InteractionRestrictionFaction>().Any()) {
                 AbsoluteProfessionPrioritiesMod.Instance.buryColonistFailCooldown = 5;

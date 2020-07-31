@@ -69,6 +69,12 @@
       <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Founders Fortune\Founders Fortune_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="UnityEngine.InputLegacyModule">
+      <HintPath>C:\FFBuild\Founders Fortune_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.InputModule">
+      <HintPath>C:\FFBuild\Founders Fortune_Data\Managed\UnityEngine.InputModule.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.TextRenderingModule">
       <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Founders Fortune\Founders Fortune_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
       <Private>False</Private>
@@ -87,6 +93,8 @@
       <Link>UnityUtils.cs</Link>
     </Compile>
     <Compile Include="AbsoluteProfessionPrioritiesMod.cs" />
+    <Compile Include="Components\OrderableToggle.cs" />
+    <Compile Include="Framework\Specialization.cs" />
     <Compile Include="Patches\InteractableBookKeeperHelper.cs" />
     <Compile Include="InteractionRestrictions.cs" />
     <Compile Include="Patches\ProfessionDetailPanelPatch.cs" />
@@ -104,7 +112,13 @@
     <None Include="AbsoluteProfessionPriorities.ffasset">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Assets\localization.json">
+    <None Include="localization.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="patch_profession.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="profession.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

@@ -73,10 +73,10 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
             InteractableBookkeeperHelper helper = new InteractableBookkeeperHelper(InteractableBookkeeper.Instance);
 
             Vector3 position = (positionOverride == default(Vector3)) ? human.GetPosition() : positionOverride;
-            foreach(var interactable in helper.GetNearbyInteractablesCustom(interaction, restrictions, position, distance, human.faction)) {
+            foreach (var interactable in helper.GetNearbyInteractablesCustom(interaction, restrictions, position, distance, human.faction)) {
                 if (probablyReachablesOnly && !human.humanNavigation.IsInteractableProbablyReachable(interactable.GetGameRepresentationID())) { continue; }
-                if (!interactable.IsPossibleInteraction(interaction, human, true, objectInteraction)) {continue; }
-                if (restrictions != null && restrictions.Any(x => x.IsRestrictedFast(interactable, interaction, human, true))) {continue; }
+                if (!interactable.IsPossibleInteraction(interaction, human, true, objectInteraction)) { continue; }
+                if (restrictions != null && restrictions.Any(x => x.IsRestrictedFast(interactable, interaction, human, true))) { continue; }
 
                 yield return interactable;
             }

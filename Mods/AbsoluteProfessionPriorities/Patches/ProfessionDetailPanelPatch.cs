@@ -31,7 +31,7 @@ namespace WitchyMods.AbsoluteProfessionPriorities
                 //Create our own panel 
                 GameObject newSpecPanel = GameObject.Instantiate(ModHandler.mods.gameObjects["SpecializationPanelModded"], parent.transform);
                 p = newSpecPanel.GetComponent<SpecializationPanel>();
-                p.Init(type, ModHandler.mods.GetProfessionSpecializations(type).ToList());
+                p.Init(type, AbsoluteProfessionPrioritiesMod.GetSpecializationDescriptors()[type].Values.ToList());
 
                 //For the collapse button to work, we need to add our panel to the accordion
                 //We also remove the original panel from it
