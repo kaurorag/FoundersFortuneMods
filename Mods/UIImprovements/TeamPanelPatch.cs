@@ -60,7 +60,7 @@ namespace WitchyMods.UIImprovements
                     objRect.anchorMin = new Vector2(0, 1);
                     objRect.anchorMax = new Vector2(0, 1);
                     objRect.pivot = new Vector2(0, 0.5f);
-                    objRect.sizeDelta = new Vector2(24, 24);
+                    //objRect.sizeDelta = new Vector2(24, 24);
                 }
 
                 //Current task in portrait

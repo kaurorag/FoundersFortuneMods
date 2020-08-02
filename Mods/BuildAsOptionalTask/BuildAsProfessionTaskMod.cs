@@ -69,7 +69,7 @@ namespace WitchyMods.BuildAsProfessionTask {
     }
 
     public static class APPWorkInteractionControllerPatch {
-        public static bool GetInteractionsForModsPrefix(Profession p, String spec, ref IEnumerable<InteractionRestricted> __result) {
+        public static bool GetInteractionsForModsPrefix(String spec, ref IEnumerable<InteractionRestricted> __result) {
             __result = null;
 
             switch (spec) {

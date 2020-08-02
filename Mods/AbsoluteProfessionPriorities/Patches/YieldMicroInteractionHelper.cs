@@ -134,22 +134,12 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
         }
 
         //Custom
-        public void ContinueTendToFields() {
-            human.AbortInteractionAt(0, false);
-            Specialization spec = AbsoluteProfessionPrioritiesMod.Instance.ColonistsData[human.GetID()][ProfessionType.Farmer]["tendToFields"];
-            if (spec.Active) {
-                foreach (var info in WorkInteractionControllerPatch.GetTendToFieldsInteraction(human, spec)) {
-                    if (info != null) {
-                        human.SetCurrentTask(info);
-                        break;
-                    }
-                }
-            }
-        }
-
         public IEnumerable<YieldResult> New_TendToFields() {
-            Furniture furniture = InteractionTarget.GetPrimaryHolder<Furniture>();
-            SoilModule soilModule = furniture.GetModule<SoilModule>();
+            DebugLogger.Log($"InteractionTarget={InteractionTarget}");
+            DebugLogger.Log($"InteractionInfo={InteractionInfo}");
+
+            Furniture furniture = InteractionTarget.GetPrimaryHolder<Furniture>(); DebugLogger.Log($"furniture={furniture}");
+            SoilModule soilModule = furniture.GetModule<SoilModule>(); DebugLogger.Log($"soilModule={soilModule}");
 
             foreach (var interaction in soilModule.GetInteractions(human, InteractionInfo.issuedByAI, false)) {
                 if (interaction.interaction == Interaction.RemoveInfestedPlants ||
@@ -164,6 +154,8 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
                     if (!WorldScripts.Instance.furnitureFactory.GetModules<InventoryReplenishmentModule>().Any(x => x.GetResource() == Resource.Water))
                         continue;
 
+                    DebugLogger.Log($"human={human}");
+                    DebugLogger.Log($"human.equipmentSet={human.equipmentSet}");
                     //InteractionRestrictionEquipmentEffect cheat.  we don't check the distance
                     if (!human.equipmentSet.GetEffects().Any(x => x.first == EquipmentEffect.WateringPlants))
                         continue;
@@ -185,10 +177,48 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
             yield return YieldResult.Completed;
         }
 
+        //public IEnumerable<YieldResult> New_TendToFields() {
+        //    Furniture furniture = InteractionTarget.GetPrimaryHolder<Furniture>();
+        //    SoilModule soilModule = furniture.GetModule<SoilModule>();
+
+        //    foreach (var interaction in soilModule.GetInteractions(human, InteractionInfo.issuedByAI, false)) {
+        //        if (interaction.interaction == Interaction.RemoveInfestedPlants ||
+        //            interaction.interaction == Interaction.RemovePlant ||
+        //            interaction.interaction == TendToFieldsInteraction)
+        //            continue;
+
+        //        if (interaction.interaction == Interaction.WaterPlant) {
+        //            if (!soilModule.GetSeasons().Contains(SeasonManager.GetCurrentSeason())) continue;
+
+        //            //InteractionRestrictionCanTakeResourceNearby cheat.  we don't check the distance
+        //            if (!WorldScripts.Instance.furnitureFactory.GetModules<InventoryReplenishmentModule>().Any(x => x.GetResource() == Resource.Water))
+        //                continue;
+
+        //            //InteractionRestrictionEquipmentEffect cheat.  we don't check the distance
+        //            if (!human.equipmentSet.GetEffects().Any(x => x.first == EquipmentEffect.WateringPlants))
+        //                continue;
+
+        //        } else if (!WorkInteractionControllerPatch.CheckInteraction(InteractionTarget, interaction, human))
+        //            continue;
+
+        //        subTask = new YieldMicroInteraction(new InteractionInfo(
+        //            interaction.interaction, InteractionTarget, interaction.restrictions, InteractionInfo.issuedByAI, InteractionInfo.priority, isContinuationOrSubtask: true),
+        //            human);
+
+        //        while (subTask != null) { // WHILEPROTECTED
+        //            subTask = subTask.Handle();
+        //            yield return YieldResult.WaitFrame;
+        //        }
+        //        StopCurrentSubtask();
+        //    }
+
+        //    yield return YieldResult.Completed;
+        //}
+
         public IEnumerable<YieldResult> New_WaterPlantCustom() {
             if (human.inventory.GetCount(Resource.Water) == 0) {
                 List<InteractionRestriction> restrictions = new List<InteractionRestriction>() { new InteractionRestrictionResource(Resource.Water) };
-                Interactable well = WorkInteractionControllerPatch.SearchForInteractableWithInteraction(human, Interaction.TakeIntoInventory, -1f, restrictions);
+                Interactable well = human.SearchForInteractableWithInteraction(Interaction.TakeIntoInventory, -1f, restrictions);
 
                 subTask = new YieldMicroInteraction(new InteractionInfo(Interaction.TakeIntoInventory, well, restrictions, InteractionInfo.issuedByAI, InteractionInfo.priority, false, false, true), human);
                 while (subTask != null) { // WHILEPROTECTED
@@ -229,10 +259,23 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
             foreach (var x in Tame()) yield return x;
         }
 
+        private IEnumerable<YieldResult> New_Sow() {
+            foreach (var x in Walk(InteractionTarget, 0.02f)) { yield return x; }
+            yield return LockInteraction();
+            TurnToTransform();
+            human.SetAnimationParameter("isPlanting", true);
+            float plantingEndTime = 2f; // is actually 3.8
+            float plantingTime = (5 + plantingEndTime) * human.GetWorkTimeFactor() - plantingEndTime;
+            foreach (var x in Wait(plantingTime)) { yield return x; }
+            yield return Interact();
+            yield return YieldResult.Completed;
+        }
+
         public IEnumerable<YieldResult> StartGetInteractionEnumerable(Interaction interaction) {
 
             switch (interaction) {
                 case TendToFieldsInteraction: return ContinueInteraction(New_TendToFields(), 20f);
+                case Interaction.Sow: return New_Sow();
                 case Interaction.ClearStumps:
                 case Interaction.GatherResource: if (InteractionInfo.isContinuationOrSubtask) return WorkOnFurniture(); else return null;
                 case Interaction.WaterPlant: return New_WaterPlantCustom();

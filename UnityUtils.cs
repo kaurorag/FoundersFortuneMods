@@ -80,12 +80,15 @@ public static class DebugLogger
 #endif
     }
 
+    private static object LogLock = new object();
     public static void Log(String text)
     {
 #if DEBUG
-        using (FileStream fs = new FileStream(PATH, FileMode.Append, FileAccess.Write))
-        using (StreamWriter writer = new StreamWriter(fs))
-            writer.WriteLine(text);
+        lock (LogLock) {
+            using (FileStream fs = new FileStream(PATH, FileMode.Append, FileAccess.Write))
+            using (StreamWriter writer = new StreamWriter(fs))
+                writer.WriteLine(text);
+        }
 #endif
     }
 

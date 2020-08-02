@@ -107,6 +107,8 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
             foreach (var panel in this.DetailPanels) {
                 panel.InitForHuman(this.Human);
             }
+
+            OrderDetailPanels();
         }
 #endif
     }

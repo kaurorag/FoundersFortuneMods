@@ -17,7 +17,11 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
 
         public int Value {
             get { return Convert.ToInt32(OrderInput.text); }
-            set { OrderInput.text = Mathf.Clamp(value, this.MinValue, this.MaxValue).ToString(); }
+            set {
+                OrderInput.text = Mathf.Clamp(value, this.MinValue, this.MaxValue).ToString();
+                UpButton.interactable = this.Value > this.MinValue;
+                DownButton.interactable = this.Value < this.MaxValue;
+            }
         }
 
         public int MinValue { get; set; } = 0;

@@ -23,7 +23,9 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
         public Toggle AutoPriorityToggle;
 
 #if !MODKIT
+        private HumanAI human;
         private string SpecializationName;
+        private bool canAutoManage = true;
         public Specialization Specialization;
 
         private SpecializationPanel ParentPanel = null;
@@ -39,6 +41,7 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
             this.ParentPanel = parent;
             this.SpecializationName = spec.Name;
 
+            canAutoManage = spec.CanAutoManageSubSpecializations;
             this.AutoPriorityToggle.gameObject.SetActive(spec.CanAutoManageSubSpecializations);
 
             this.SpecializationToggle.MaxValue = maxValue;
@@ -57,9 +60,10 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
                     subToggle.MaxValue = spec.SubSpecializations.Count - 1;
                     subToggle.gameObject.SetActive(true);
 
-                    subToggle.UpButton.onClick.AddListener(() => SubButtonUpClicked(subToggle));
-                    subToggle.DownButton.onClick.AddListener(() => SubButtonDownClicked(subToggle));
-                    subToggle.Toggle.onValueChanged.AddListener((x) => SubToggleValueChanged(subToggle));
+                    subToggle.UpButton.onClick.AddListener(() => SubSpecializationToggle_ButtonUpClicked(subToggle));
+                    subToggle.DownButton.onClick.AddListener(() => SubSpecializationToggle_ButtonDownClicked(subToggle));
+                    subToggle.Toggle.onValueChanged.AddListener((x) => SubSpecializationToggle_ToggleValueChanged(subToggle));
+                    subToggle.OrderInput.onValueChanged.AddListener((x) => SubSpecializationToggle_InputValueChanged(subToggle));
 
                     this.SubSpecToggles.Add(sub.Name, subToggle);
                 }
@@ -70,14 +74,15 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
             this.SpecializationToggle.OrderInput.onValueChanged.AddListener((x) => SpecializationToggle_InputValueChanged());
             this.SpecializationToggle.Toggle.onValueChanged.AddListener((x) => SpecializationToggle_ToggleValueChanged());
 
-            this.SubCollapseButton.onClick.AddListener(SubCollapseClicked);
-            this.SubExpandButton.onClick.AddListener(SubExpandClicked);
+            this.SubCollapseButton.onClick.AddListener(SpecializationToggle_CollapseButtonClicked);
+            this.SubExpandButton.onClick.AddListener(SpecializationToggle_ExpandButtonClicked);
 
             this.AutoPriorityToggle.onValueChanged.AddListener(this.AutoManageToggle_ValueChanged);
         }
 
         public void InitForHuman(HumanAI human) {
             inInit = true;
+            this.human = human;
             this.Specialization = AbsoluteProfessionPrioritiesMod.Instance.ColonistsData[human.GetID()][this.ParentPanel.ProfessionType][this.SpecializationName];
 
             this.SpecializationToggle.Value = this.Specialization.Priority;
@@ -114,7 +119,19 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
             ParentPanel.Human.professionManager.SetSpecializationActive(this.Specialization.Name, ParentPanel.ProfessionType, this.SpecializationToggle.Toggle.isOn, ParentPanel.Human);
         }
 
-        private void SubSpecializationToggle_OrderChanged(OrderableToggle toggle) {
+        private void SpecializationToggle_ExpandButtonClicked() {
+            this.SubExpandButton.gameObject.SetActive(false);
+            this.SubCollapseButton.gameObject.SetActive(true);
+            this.SubSpecializationsContainer.SetActive(true);
+        }
+
+        private void SpecializationToggle_CollapseButtonClicked() {
+            this.SubExpandButton.gameObject.SetActive(true);
+            this.SubCollapseButton.gameObject.SetActive(false);
+            this.SubSpecializationsContainer.SetActive(false);
+        }
+
+        private void SubSpecializationToggle_InputValueChanged(OrderableToggle toggle) {
             if (inInit) return;
 
             this.Specialization.SubSpecializations[toggle.name].Priority = toggle.Value;
@@ -125,35 +142,18 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
             if (inInit) return;
 
             this.Specialization.SubSpecializations[toggle.name].Active = toggle.Toggle.isOn;
-        }
 
-        private void OrderSubSpecializations() {
-            int index = 0;
-            foreach(var subToggle in this.SubSpecToggles.Values.OrderBy(x => x.Value)) {
-                subToggle.transform.SetSiblingIndex(index);
-                index++;
+            if (!toggle.Toggle.isOn) {
+                DebugLogger.Log($"Profession:{this.Specialization.Profession}");
+                foreach (var interaction in ProfessionManager.workInteractions[this.Specialization.Profession]) {
+                    DebugLogger.Log($"\tinteraction:{interaction}");
+                }
+                this.human.AbortInteractionsWhere(x =>
+                ProfessionManager.workInteractions[this.Specialization.Profession].Contains(x.interaction));
             }
         }
 
-        private void UpdateOrderButtonsState() {
-            foreach (var subToggle in this.SubSpecToggles.Values) {
-                subToggle.transform.Find("ButtonContainer").gameObject.SetActive(!this.Specialization.AutoManageSubSpecializations);
-            }
-        }
-
-        private void SubExpandClicked() {
-            this.SubExpandButton.gameObject.SetActive(false);
-            this.SubCollapseButton.gameObject.SetActive(true);
-            this.SubSpecializationsContainer.SetActive(true);
-        }
-
-        private void SubCollapseClicked() {
-            this.SubExpandButton.gameObject.SetActive(true);
-            this.SubCollapseButton.gameObject.SetActive(false);
-            this.SubSpecializationsContainer.SetActive(false);
-        }
-
-        private void SubButtonUpClicked(OrderableToggle toggle) {
+        private void SubSpecializationToggle_ButtonUpClicked(OrderableToggle toggle) {
             if (Input.GetButton("Shift")) {
                 toggle.Value--;
             } else {
@@ -175,7 +175,7 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
             this.OrderSubSpecializations();
         }
 
-        private void SubButtonDownClicked(OrderableToggle toggle) {
+        private void SubSpecializationToggle_ButtonDownClicked(OrderableToggle toggle) {
             if (Input.GetButton("Shift")) {
                 toggle.Value++;
             } else {
@@ -197,8 +197,18 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
             this.OrderSubSpecializations();
         }
 
-        public void SubToggleValueChanged(OrderableToggle toggle) {
-            this.Specialization.SubSpecializations[toggle.name].Active = toggle.Toggle.isOn;
+        private void OrderSubSpecializations() {
+            int index = 0;
+            foreach(var subToggle in this.SubSpecToggles.Values.OrderBy(x => x.Value)) {
+                subToggle.transform.SetSiblingIndex(index);
+                index++;
+            }
+        }
+
+        private void UpdateOrderButtonsState() {
+            foreach (var subToggle in this.SubSpecToggles.Values) {
+                subToggle.transform.Find("ButtonContainer").gameObject.SetActive(!canAutoManage || !this.Specialization.AutoManageSubSpecializations);
+            }
         }
 #endif
     }

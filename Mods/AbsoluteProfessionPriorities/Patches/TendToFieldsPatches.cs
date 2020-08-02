@@ -28,26 +28,6 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
             __result = helper.New_Handle();
             return false;
         }
-
-        [HarmonyPatch(typeof(YieldMicroInteraction), "Continue")]
-        [HarmonyPrefix]
-        private static bool Continue_Prefix(YieldMicroInteraction __instance, float distance) {
-            YieldMicroInteractionHelper helper = new YieldMicroInteractionHelper(__instance);
-
-            switch (helper.Interaction) {
-                case Interaction.Sow: if (helper.InteractionInfo.isContinuationOrSubtask) return false;  break;
-                case YieldMicroInteractionHelper.TendToFieldsInteraction: helper.ContinueTendToFields(); return false;
-                case Interaction.Construct: break;
-            }
-
-            if (helper.Interaction == Interaction.Sow && helper.InteractionInfo.isContinuationOrSubtask) return false;
-            else if (helper.Interaction == YieldMicroInteractionHelper.TendToFieldsInteraction) {
-                helper.ContinueTendToFields();
-                return false;
-            }
-
-            return true;
-        }
     }
 
     [HarmonyPatch(typeof(SoilModule))]

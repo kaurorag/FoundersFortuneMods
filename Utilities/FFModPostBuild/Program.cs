@@ -12,10 +12,9 @@ namespace FFModPostBuild
     {
         static void Main(string[] args)
         {
-
             Console.WriteLine(String.Format("Args Length:{0}", args.Length));
 
-            if (args.Length != 2)
+            if (args.Length < 2)
                 throw new ArgumentException("Not enough parameters");
 
             for (int i = 0; i < args.Length; i++)
@@ -26,6 +25,7 @@ namespace FFModPostBuild
 
             String projectDir = args[0];
             String modName = args[1];
+            List<string> includedFiles = args.Skip(2).ToList();
 
             String userAppData = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
             String modDir = userAppData + @"\AppData\LocalLow\Oachkatzlschwoaf Interactive\Founders Fortune\mods\" + modName + "\\";
@@ -71,15 +71,16 @@ namespace FFModPostBuild
 
             foreach (var file in Directory.GetFiles(projectDir, "*", SearchOption.AllDirectories))
             {
-                String ext = Path.GetExtension(file);
+                if (!includedFiles.Contains(Path.GetFileName(file))) {
+                    String ext = Path.GetExtension(file);
 
-                if (ext == ".pdb" || ext == ".xml") continue;
+                    if (ext == ".pdb" || ext == ".xml") continue;
 
-                if (ext == ".dll")
-                {
-                    String fileName = Path.GetFileNameWithoutExtension(file);
+                    if (ext == ".dll") {
+                        String fileName = Path.GetFileNameWithoutExtension(file);
 
-                    if (fileName != "0Harmony" && fileName != modAssemblyName && fileName != "ModSettingsFramework") continue;
+                        if (fileName != "0Harmony" && fileName != modAssemblyName && fileName != "ModSettingsFramework") continue;
+                    }
                 }
 
                 String newPath = file.Replace(projectDir, modDir);

@@ -121,7 +121,7 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
 
                 foreach(var spec in ModHandler.mods.professionSpecializations.Values
                     .Where(x=>x.professionNames.Contains(profession.ToString().ToLower()))) {
-                    descriptors[profession].Add(spec.name, new SpecializationDescriptor(spec.name));
+                    descriptors[profession].Add(spec.name, new SpecializationDescriptor(profession, spec.name));
 
                     foreach(var subName in subSpecializations.Where(x => x.StartsWith($"{profession}_{spec.name}_", StringComparison.InvariantCultureIgnoreCase))) {
                         descriptors[profession][spec.name].SubSpecializations.Add(subName, new SubSpecializationDescriptor(subName));
@@ -132,6 +132,7 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
                         case "cook":
                         case "careForAnimals":
                         case "produceMedicine":
+                        case "chopTrees":
                             descriptors[profession][spec.name].CanAutoManageSubSpecializations = true;
                             break;
 
@@ -165,7 +166,8 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
                 "Farmer_CareForAnimals_Tame",
 
                 "Forester_ChopTrees_Stumps",
-                "Forester_ChopTrees_Trees",
+                "Forester_ChopTrees_BigTrees",
+                "Forester_ChopTrees_SmallTrees",
 
                 "Forester_GrowTrees_PineTrees",
                 "Forester_GrowTrees_Apples", 

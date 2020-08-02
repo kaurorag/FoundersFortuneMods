@@ -1,0 +1,11 @@
+﻿{
+  "witchy_AnimalAlerts_birth": {
+    "english": "{0} has been born!"
+  },
+"witchy_AnimalAlerts_butchered": {
+    "english": "{0} has been butchered!"
+  },
+"witchy_AnimalAlerts_diedOldAge": {
+    "english": "{0} has died of old age."
+  },
+}

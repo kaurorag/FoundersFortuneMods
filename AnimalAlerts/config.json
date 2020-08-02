@@ -1,0 +1,27 @@
+﻿{
+  "name": "AnimalAlerts",
+  "version": "1.0.0",
+  "author": "Witchy",
+  "website": "",
+  "description": "
+[h1]Description[/h1]
+Adds various alerts for animals such as birth and death.
+
+[h1]Changelog[/h1]
+[list]
+[*][b]1.0.0[/b]: Initial release
+[/list]
+
+[h1]How does it work?[/h1]
+If you'd like to see how I implemented my mods, feel free to browse the source code available on my [url=https://github.com/WitchyMods/FoundersFortuneMods]Github[/url]
+
+[h1]Want to donate?[/h1]
+My mods will always be free!
+However, if you'd like to support my modding efforts, [b][url=https://www.buymeacoffee.com/WitchyMods]Buy Me A Coffee[/url][/b].
+
+[h1]Contact[/h1]
+If you'd like to report a bug or suggest an idea or need help with modding, join the official Founders' Fortune [url=https://discord.gg/GkhSZeT]Discord Channel[/url]",
+  "compatibleVersions": [
+    "Alpha 14"
+  ]
+}
