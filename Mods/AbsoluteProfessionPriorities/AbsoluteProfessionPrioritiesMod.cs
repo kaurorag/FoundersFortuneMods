@@ -13,7 +13,11 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
         [NonSerialized]
         public static AbsoluteProfessionPrioritiesMod Instance;
 
+        [NonSerialized]
+        public static int MaxTreeWoodAmount = 10;
+
         public float? buryColonistFailCooldown;
+
 
 
         public override void Load() {
@@ -40,6 +44,11 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
             foreach (var colonist in colonists) {
                 InitColonist(colonist);
             }
+
+            MaxTreeWoodAmount = ModHandler.mods.furnitures.Values
+                .Where(x => x.modules.ContainsKey("resource"))
+                .Select(x => x.GetCachedModule<ResourceModule>())
+                .Where(x => x.GetResource() == Resource.Wood).Max(x => x.resourcesPerRound);
         }
 
         public void InitColonist(HumanAI human) {
@@ -133,6 +142,7 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
                         case "careForAnimals":
                         case "produceMedicine":
                         case "chopTrees":
+                        case "growTrees":
                             descriptors[profession][spec.name].CanAutoManageSubSpecializations = true;
                             break;
 

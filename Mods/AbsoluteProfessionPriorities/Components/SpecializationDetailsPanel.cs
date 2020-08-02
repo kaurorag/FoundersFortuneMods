@@ -21,6 +21,7 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
         public GameObject SubSpecializationsContainer;
         public OrderableToggle SubSpecializationToggleTemplate;
         public Toggle AutoPriorityToggle;
+        public Text AutoPriorityText;
 
 #if !MODKIT
         private HumanAI human;
@@ -43,6 +44,13 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
 
             canAutoManage = spec.CanAutoManageSubSpecializations;
             this.AutoPriorityToggle.gameObject.SetActive(spec.CanAutoManageSubSpecializations);
+
+            if (spec.CanAutoManageSubSpecializations) {
+                this.AutoPriorityText.gameObject.SetActive(false);
+                this.AutoPriorityText.gameObject.AddComponent<TooltipHoverable>().Init("",
+                    Localization.GetText($"Specialization_{spec.Profession}_{spec.Name}_AutoManageTooltip"));
+                this.AutoPriorityText.gameObject.SetActive(true);
+            }
 
             this.SpecializationToggle.MaxValue = maxValue;
             this.SpecializationToggle.ToggleText.text = spec.GetDisplayName();

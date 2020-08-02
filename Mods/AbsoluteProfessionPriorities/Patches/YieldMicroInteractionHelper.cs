@@ -274,10 +274,10 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
         public IEnumerable<YieldResult> StartGetInteractionEnumerable(Interaction interaction) {
 
             switch (interaction) {
-                case TendToFieldsInteraction: return ContinueInteraction(New_TendToFields(), 20f);
+                case TendToFieldsInteraction: return ContinueInteraction(New_TendToFields(), -1);
                 case Interaction.Sow: return New_Sow();
                 case Interaction.ClearStumps:
-                case Interaction.GatherResource: if (InteractionInfo.isContinuationOrSubtask) return WorkOnFurniture(); else return null;
+                case Interaction.GatherResource: if (InteractionInfo.isContinuationOrSubtask) return WorkOnFurniture(); else return ContinueInteraction(WorkOnFurniture(), -1);
                 case Interaction.WaterPlant: return New_WaterPlantCustom();
                 case Interaction.Tame: return New_Tame();
                 case Interaction.Butcher: return New_Butcher();

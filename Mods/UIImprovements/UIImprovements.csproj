@@ -84,9 +84,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\UnityUtils.cs">
-      <Link>UnityUtils.cs</Link>
-    </Compile>
     <Compile Include="AnimalButton.cs" />
     <Compile Include="AnimalCyclerPanel.cs" />
     <Compile Include="DayTimePanel.cs" />

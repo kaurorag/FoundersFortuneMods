@@ -74,12 +74,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\UnityUtils.cs">
-      <Link>UnityUtils.cs</Link>
-    </Compile>
     <Compile Include="Extensions\IEnumerableEx.cs" />
     <Compile Include="ReflectionUtils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UnityUtils.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

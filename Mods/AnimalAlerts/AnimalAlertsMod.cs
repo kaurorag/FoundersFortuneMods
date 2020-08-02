@@ -18,12 +18,8 @@ namespace WitchyMods.AnimalAlerts {
         public readonly List<HumanAI> animalsMarkedForButchering = new List<HumanAI>();
 
         public override void Load() {
-            try {
                 Harmony harmony = new Harmony(this.GetType().FullName);
                 harmony.PatchAll();
-            } catch (Exception ex) {
-                DebugLogger.Log(ex);
-            }
         }
 
         public override void Start() {

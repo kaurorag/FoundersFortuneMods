@@ -80,16 +80,22 @@
   "subSpecialization_Scholar_PerformResearch_ScrollStand": {
     "english": "At Scroll Stand"
   },
-  "Specialization_Farmer_TendToFields_AutoManageTooltip": {
+  "Specialization_Farmer_tendToFields_AutoManageTooltip": {
     "english": "If low on food, will try to harvest the closest edible plant. Otherwise will order plants by their Owned Count / Max Storage ratio."
   },
-  "Specialization_Farmer_Cook_AutoManageTooltip": {
+  "Specialization_Farmer_cook_AutoManageTooltip": {
     "english": "Will order meal types by their Owned Count / Max Storage ratio."
   },
-  "Specialization_Farmer_CareForAnimals_AutoManageTooltip": {
-    "english": "Will order meal types by their Owned Count / Max Storage ratio."
+  "Specialization_Farmer_careForAnimals_AutoManageTooltip": {
+    "english": "Will first try to tame animals, starting with the wildest then will care for the closest animal."
   },
-  "Specialization_Scholar_PerformResearch_AutoManageTooltip": {
-    "english": "Will select the closest possible research stand"
+  "Specialization_Forester_chopTrees_AutoManageTooltip": {
+    "english": "If low on wood, will go for the closest tree.  Otherwise, will go for the closest tree OR stump."
+  },
+  "Specialization_Forester_growTrees_AutoManageTooltip": {
+    "english": "Will look for the closest tree growing spot."
+  },
+  "Specialization_Doctor_produceMedicine_AutoManageTooltip": {
+    "english": "Will order potions types by their Owned Count / Max Storage ratio."
   }
 }

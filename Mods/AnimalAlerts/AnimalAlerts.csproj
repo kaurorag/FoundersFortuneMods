@@ -80,9 +80,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\UnityUtils.cs">
-      <Link>UnityUtils.cs</Link>
-    </Compile>
     <Compile Include="AnimalAlertsMod.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -94,7 +91,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\..\Utilities\FFModUtils\FFModUtils.csproj">
+      <Project>{a702130c-08f5-436b-a6bf-f6ab6b883f0d}</Project>
+      <Name>FFModUtils</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>$(SolutionDir)Utilities\FFModPostBuild.exe $(TargetDir) "$(ProjectName)"</PostBuildEvent>

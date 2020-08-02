@@ -242,74 +242,98 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
                 var orderedSubs = spec.GetOrderedSubSpecializations();
 
                 switch (spec.Name) {
-                    case "chopTrees":
+                    case "chopTrees": {
 
-                        IEnumerable<ResourceModule> woodModules = WorldScripts.Instance.furnitureFactory.GetModules<ResourceModule>()
-                                .Where(x => x.GetResource() == Resource.Wood && !x.isDepleted)
-                                .OrderBy(x => Vector3.Distance(humanPos, x.parent.GetPosition())); ;
+                            IEnumerable<ResourceModule> woodModules = WorldScripts.Instance.furnitureFactory.GetModules<ResourceModule>()
+                                    .Where(x => x.GetResource() == Resource.Wood && !x.isDepleted)
+                                    .OrderBy(x => Vector3.Distance(humanPos, x.parent.GetPosition())); ;
 
-                        List<string> activeSubs = spec.GetOrderedSubSpecializations().Select(x => x.Name).ToList();
+                            List<string> activeSubs = spec.GetOrderedSubSpecializations().Select(x => x.Name).ToList();
 
-                        if (spec.AutoManageSubSpecializations) {
-                            bool lowOnWood = GetResourceRatio(Resource.Wood) < 0.20;
-                            Dictionary<ResourceModule, InteractionRestricted> skipped = new Dictionary<ResourceModule, InteractionRestricted>();
+                            if (activeSubs.Count == 0) continue;
 
-                            foreach (ResourceModule rm in woodModules) {
-                                foreach (var interactionRestricted in rm.GetInteractions(human, true, false)) {
-                                    if (interactionRestricted.interaction == Interaction.GatherResource) {
-                                        if (!spec.SubSpecializations["Forester_ChopTrees_Trees"].Active) continue;
-                                    } else if (interactionRestricted.interaction == Interaction.ClearStumps) {
-                                        if (!spec.SubSpecializations["Forester_ChopTrees_Stumps"].Active) continue;
-                                        if (lowOnWood) { skipped.Add(rm, interactionRestricted); continue; }
+
+                            if (spec.AutoManageSubSpecializations) {
+                                if (!activeSubs.Contains("Forester_ChopTrees_Stumps"))
+                                    woodModules = woodModules.Where(x => x.resourcesPerRound != 0);
+                                if (!activeSubs.Contains("Forester_ChopTrees_BigTrees"))
+                                    woodModules = woodModules.Where(x => x.resourcesPerRound != AbsoluteProfessionPrioritiesMod.MaxTreeWoodAmount);
+                                if (!activeSubs.Contains("Forester_ChopTrees_SmallTrees"))
+                                    woodModules = woodModules.Where(x => x.resourcesPerRound == 0 || x.resourcesPerRound == AbsoluteProfessionPrioritiesMod.MaxTreeWoodAmount);
+
+                                bool lowOnWood = GetResourceRatio(Resource.Wood) < 0.20;
+                                if (lowOnWood) woodModules = woodModules.OrderByDescending(x => x.resourcesPerRound);
+
+                                foreach (var woodModule in woodModules) {
+                                    InteractionRestricted intRes = woodModule.GetInteractions(human, true, false).First();
+                                    if (!CheckInteraction(woodModule.parent.GetInteractable(), intRes, human)) continue;
+                                    yield return new InteractionInfo(intRes.interaction, woodModule.parent.GetInteractable(), intRes.restrictions, true, 50);
+                                }
+                            } else {
+                                IEnumerable<ResourceModule> subModules = null;
+                                foreach (var sub in activeSubs) {
+                                    switch (sub) {
+                                        case "Forester_ChopTrees_Stumps": subModules = woodModules.Where(x => x.resourcesPerRound == 0); break;
+                                        case "Forester_ChopTrees_BigTrees": subModules = woodModules.Where(x => x.resourcesPerRound == AbsoluteProfessionPrioritiesMod.MaxTreeWoodAmount); break;
+                                        case "Forester_ChopTrees_SmallTrees": subModules = woodModules.Where(x => x.resourcesPerRound != 0 && x.resourcesPerRound != AbsoluteProfessionPrioritiesMod.MaxTreeWoodAmount); break;
                                     }
 
-                                    if (!CheckInteraction(rm.parent.GetInteractable(), interactionRestricted, human)) continue;
-
-                                    yield return new InteractionInfo(interactionRestricted.interaction,
-                                    rm.parent.GetInteractable(), interactionRestricted.restrictions, true, 50);
-                                }
-                            }
-
-                            foreach(var rm in skipped) {
-                                if (!CheckInteraction(rm.Key.parent.GetInteractable(), rm.Value, human)) continue;
-
-                                yield return new InteractionInfo(rm.Value.interaction,
-                                rm.Key.parent.GetInteractable(), rm.Value.restrictions, true, 50);
-                            }
-                        } else {
-                            Interaction subInteraction = Interaction.NoInteraction;
-
-                            foreach(var sub in spec.GetOrderedSubSpecializations()) {
-                                switch (sub.Name) {
-                                    case "Forester_ChopTrees_Trees": subInteraction = Interaction.GatherResource; break;
-                                    case "Forester_ChopTrees_Stumps": subInteraction = Interaction.ClearStumps; break;
-                                }
-
-                                foreach (ResourceModule rm in woodModules) {
-                                    foreach (var interactionRestricted in rm.GetInteractions(human, true, false)
-                                        .Where(x=>x.interaction == subInteraction)) {
-
-                                        if (!CheckInteraction(rm.parent.GetInteractable(), interactionRestricted, human)) continue;
-
-                                        yield return new InteractionInfo(interactionRestricted.interaction,
-                                        rm.parent.GetInteractable(), interactionRestricted.restrictions, true, 50);
+                                    foreach (var woodModule in subModules) {
+                                        InteractionRestricted intRes = woodModule.GetInteractions(human, true, false).First();
+                                        if (!CheckInteraction(woodModule.parent.GetInteractable(), intRes, human)) continue;
+                                        yield return new InteractionInfo(intRes.interaction, woodModule.parent.GetInteractable(), intRes.restrictions, true, 50);
                                     }
                                 }
                             }
                         }
                         break;
 
-                    case "growTrees":
+                    case "growTrees": {
+                            List<string> activeSubs = spec.GetOrderedSubSpecializations().Select(x => x.Name).ToList();
 
-                        IEnumerable<GrowingSpotModule> growingSpotModules = WorldScripts.Instance.furnitureFactory.GetModules<GrowingSpotModule>()
-                            .Where(x => x.parent.IsBuilt() && x.parent.IsValid() &&
-                            human.professionManager.HasSkill(x.requiredSkill))
-                            .OrderBy(x => Vector3.Distance(humanPos, x.parent.GetPosition()));
+                            if (activeSubs.Count == 0) continue;
 
-                        foreach (var spot in growingSpotModules) {
-                            foreach (var intRes in spot.GetInteractions(human, true, false)) {
-                                if (CheckInteraction(spot.parent.GetInteractable(), intRes, human)) {
-                                    yield return new InteractionInfo(intRes.interaction, spot.parent.GetInteractable(), intRes.restrictions, true, 50);
+                            IEnumerable<GrowingSpotModule> growingSpotModules = WorldScripts.Instance.furnitureFactory.GetModules<GrowingSpotModule>()
+                                .Where(x => x.parent.IsBuilt() && x.parent.IsValid() &&
+                                human.professionManager.HasSkill(x.requiredSkill))
+                                .OrderBy(x => Vector3.Distance(humanPos, x.parent.GetPosition()));
+
+                            if (spec.AutoManageSubSpecializations) {
+                                if (!activeSubs.Contains("Forester_GrowTrees_PineTrees"))
+                                    growingSpotModules = growingSpotModules.Where(x => x.requiredSkill != "growingTrees");
+
+                                if (!activeSubs.Contains("Forester_GrowTrees_Apples"))
+                                    growingSpotModules = growingSpotModules.Where(x => x.requiredSkill != "growingAppleTrees");
+
+                                if (!activeSubs.Contains("Forester_GrowTrees_Cotton"))
+                                    growingSpotModules = growingSpotModules.Where(x => x.requiredSkill != "growingCotton");
+
+                                foreach (var spot in growingSpotModules) {
+                                    foreach (var intRes in spot.GetInteractions(human, true, false)
+                                        .Where(x => x.interaction != Interaction.RemovePlant)) {
+                                        if (CheckInteraction(spot.parent.GetInteractable(), intRes, human)) {
+                                            yield return new InteractionInfo(intRes.interaction, spot.parent.GetInteractable(), intRes.restrictions, true, 50);
+                                        }
+                                    }
+                                }
+                            } else {
+                                IEnumerable<GrowingSpotModule> subModules = null;
+
+                                foreach(var sub in activeSubs) {
+                                    switch (sub) {
+                                        case "Forester_GrowTrees_PineTrees": subModules = growingSpotModules.Where(x => x.requiredSkill == "growingTrees"); break;
+                                        case "Forester_GrowTrees_Apples": subModules = growingSpotModules.Where(x => x.requiredSkill == "growingAppleTrees"); break;
+                                        case "Forester_GrowTrees_Cotton": subModules = growingSpotModules.Where(x => x.requiredSkill == "growingCotton"); break;
+                                    }
+
+                                    foreach (var spot in subModules) {
+                                        foreach (var intRes in spot.GetInteractions(human, true, false)
+                                            .Where(x => x.interaction != Interaction.RemovePlant)) {
+                                            if (CheckInteraction(spot.parent.GetInteractable(), intRes, human)) {
+                                                yield return new InteractionInfo(intRes.interaction, spot.parent.GetInteractable(), intRes.restrictions, true, 50);
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -326,39 +350,34 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
 
         private static IEnumerable<InteractionInfo> GetMinerInteractions(List<Specialization> specs, HumanAI human) {
             foreach (var spec in specs) {
+                Resource resource = Resource.None;
+
                 switch (spec.Name) {
-                    case "mineStone":
-                        yield return CheckInteraction(new InteractionRestricted(Interaction.GatherResource,
-                            new List<InteractionRestriction>()
-                            {
-                                new InteractionRestrictionResource(Resource.Stone),
-                                new InteractionRestrictionDesignation(Designation.Mine)
-                            }), human);
-                        break;
+                    case "mineStone": resource = Resource.Stone; break;
 
-                    case "mineIron":
-                        yield return CheckInteraction(new InteractionRestricted(Interaction.GatherResource,
-                            new List<InteractionRestriction>()
-                            {
-                                new InteractionRestrictionResource(Resource.IronOre),
-                                new InteractionRestrictionDesignation(Designation.Mine)
-                            }), human);
-                        break;
+                    case "mineIron": resource = Resource.IronOre; break;
 
-                    case "mineCrystal":
-                        yield return CheckInteraction(new InteractionRestricted(Interaction.GatherResource,
-                            new List<InteractionRestriction>()
-                            {
-                                new InteractionRestrictionResource(Resource.Crystal),
-                                new InteractionRestrictionDesignation(Designation.Mine)
-                            }), human);
-                        break;
+                    case "mineCrystal": resource = Resource.Crystal; break;
 
                     default:
                         foreach (var x in GetOtherInteractions(spec)) {
                             yield return CheckInteraction(x, human);
                         }
                         break;
+                }
+
+                Vector3 humanPos = human.GetPosition();
+
+                if(resource != Resource.None) {
+                    foreach(var rm in WorldScripts.Instance.furnitureFactory.GetModules<ResourceModule>()
+                        .Where(x=>x.GetResource() == resource && !x.isDepleted && x.IsValid())
+                        .OrderBy(x=> Vector3.Distance(humanPos, x.parent.GetPosition()))) {
+                        foreach(var intRes in rm.GetInteractions(human, true, false)) {
+                            if(CheckInteraction(rm.parent.GetInteractable(), intRes, human)) {
+                                yield return new InteractionInfo(intRes.interaction, rm.parent.GetInteractable(), intRes.restrictions, true, 50);
+                            }
+                        }
+                    }
                 }
             }
         }

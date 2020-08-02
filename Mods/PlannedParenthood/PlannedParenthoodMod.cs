@@ -202,7 +202,6 @@ namespace WitchyMods.PlannedParenthood
             AccessTools.Field(typeof(BirthdayChildPanel), "child").SetValue(__instance, child);
 
             __instance.gameObject.SetActive(true);
-            UnityUtils.LogUnityObject(__instance.gameObject);
 
             return false;
         }

@@ -56,6 +56,16 @@ namespace WitchyMods.AbsoluteProfessionPriorities.Patches {
             return false;
         }
 
+        [HarmonyPatch(typeof(Profession), "CanUnlockSkills")]
+        [HarmonyPrefix]
+        public static bool CanUnlockSkills_Prefix(Profession __instance, ref bool __result) {
+            if (__instance.type == ProfessionType.Builder)
+                __result = false;
+            else
+                __result = ModHandler.mods.professionSpecializations.Any(x => x.Value.ForProfession(__instance.type));
+            return false;
+        }
+
         [HarmonyPatch(typeof(ProfessionManager), "SetPriority")]
         [HarmonyPrefix]
         public static bool SetPriority_Prefix(ProfessionManager __instance, ProfessionType type, int priority, HumanAI human) {
