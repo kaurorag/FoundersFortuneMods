@@ -21,6 +21,8 @@ namespace GenerateHarmonyWrapper {
                 writer.WriteLine("using System.Collections.Generic;");
                 writer.WriteLine("using System.Linq;");
                 writer.WriteLine("using HarmonyLib;");
+                writer.WriteLine("using UnityEngine;");
+                writer.WriteLine("using UnityEngine.UI;");
                 writer.WriteLine("");
                 writer.WriteLine("namespace " + targetNamespace + " {"); indent++;
                 writer.WriteLine("");
@@ -87,7 +89,7 @@ namespace GenerateHarmonyWrapper {
 
                 writer.WriteLine($"AccessTools.Method(base.GetType(), \"{m.Name}\", argTypes).Invoke(this, args);");
 
-                if (m.ReflectedType.Name != "Void") {
+                if (m.ReturnType.Name != "Void") {
                     writer.WriteLine($"{GetIndent(indent)}return result == null ? default({GetTypeName(m.ReturnType)}) : ({GetTypeName(m.ReturnType)})result;");
                 }
 
@@ -130,7 +132,7 @@ namespace GenerateHarmonyWrapper {
 
                 writer.WriteLine($"{GetIndent(indent)}public {typeName} {pi.Name} {{"); indent++;
                 writer.WriteLine($"{GetIndent(indent)}get {{ var value = AccessToolds.Field(this.GetType(),\"{pi.Name}\").GetValue(this); if(value==null) return default({typeName}); else return ({typeName})value; }}");
-                writer.WriteLine($"{GetIndent(indent)}set {{ AccessToolds.Field(this.GetType(),\"{pi.Name}\").SetValue(this, value); }}"); indent--;
+                writer.WriteLine($"{GetIndent(indent)}set {{ AccessTools.Field(this.GetType(),\"{pi.Name}\").SetValue(this, value); }}"); indent--;
                 writer.WriteLine($"{GetIndent(indent)}}}");
                 writer.WriteLine("");
             }
@@ -143,7 +145,7 @@ namespace GenerateHarmonyWrapper {
 
                 writer.WriteLine($"{GetIndent(indent)}public {typeName} {fi.Name} {{"); indent++;
                 writer.WriteLine($"{GetIndent(indent)}get {{ var value = AccessToolds.Field(this.GetType(),\"{fi.Name}\").GetValue(this); if(value==null) return default({typeName}); else return ({typeName})value; }}");
-                writer.WriteLine($"{GetIndent(indent)}set {{ AccessToolds.Field(this.GetType(),\"{fi.Name}\").SetValue(this, value); }}"); indent--;
+                writer.WriteLine($"{GetIndent(indent)}set {{ AccessTools.Field(this.GetType(),\"{fi.Name}\").SetValue(this, value); }}"); indent--;
                 writer.WriteLine($"{GetIndent(indent)}}}");
                 writer.WriteLine("");
             }

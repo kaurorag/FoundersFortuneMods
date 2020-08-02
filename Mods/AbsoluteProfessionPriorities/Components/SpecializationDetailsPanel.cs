@@ -152,9 +152,7 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
             this.Specialization.SubSpecializations[toggle.name].Active = toggle.Toggle.isOn;
 
             if (!toggle.Toggle.isOn) {
-                DebugLogger.Log($"Profession:{this.Specialization.Profession}");
                 foreach (var interaction in ProfessionManager.workInteractions[this.Specialization.Profession]) {
-                    DebugLogger.Log($"\tinteraction:{interaction}");
                 }
                 this.human.AbortInteractionsWhere(x =>
                 ProfessionManager.workInteractions[this.Specialization.Profession].Contains(x.interaction));

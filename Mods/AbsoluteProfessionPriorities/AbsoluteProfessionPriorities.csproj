@@ -92,6 +92,7 @@
   <ItemGroup>
     <Compile Include="AbsoluteProfessionPrioritiesMod.cs" />
     <Compile Include="Components\OrderableToggle.cs" />
+    <Compile Include="Framework\NewYieldMicroInteraction.cs" />
     <Compile Include="Framework\Specialization.cs" />
     <Compile Include="Patches\InteractableBookKeeperHelper.cs" />
     <Compile Include="Framework\InteractionRestrictions.cs" />
