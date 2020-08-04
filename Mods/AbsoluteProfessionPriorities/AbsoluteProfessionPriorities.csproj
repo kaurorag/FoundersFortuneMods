@@ -92,19 +92,45 @@
   <ItemGroup>
     <Compile Include="AbsoluteProfessionPrioritiesMod.cs" />
     <Compile Include="Components\OrderableToggle.cs" />
+    <Compile Include="Framework\Doctor\BrewBeerSpecialization.cs" />
+    <Compile Include="Framework\Builder\BuildFieldsSpecialization.cs" />
+    <Compile Include="Framework\Builder\BuildFurnitureSpecialization.cs" />
+    <Compile Include="Framework\Builder\BuildStructuresSpecialization.cs" />
+    <Compile Include="Framework\Doctor\BuryDeadSpecialization.cs" />
+    <Compile Include="Framework\Farmer\CareForAnimalsSpecialization.cs" />
+    <Compile Include="Framework\Craftsman\CraftsmanSpecialization.cs" />
+    <Compile Include="Framework\Forester\ChopTreesSpecialization.cs" />
+    <Compile Include="Framework\Farmer\CookSpecialization.cs" />
+    <Compile Include="Framework\Forester\GrowTreesSpecialization.cs" />
+    <Compile Include="Framework\Farmer\HarvestApplesSpecialization.cs" />
+    <Compile Include="Framework\Farmer\HarvestCottonSpecialization.cs" />
+    <Compile Include="Framework\InteractionData.cs" />
+    <Compile Include="Framework\Miner\MineCrystalSpecialization.cs" />
+    <Compile Include="Framework\Miner\MineIronSpecialization.cs" />
+    <Compile Include="Framework\Miner\MineStoneSpecialization.cs" />
     <Compile Include="Framework\NewYieldMicroInteraction.cs" />
+    <Compile Include="Framework\Scholar\PerformResearchSpecialization.cs" />
+    <Compile Include="Framework\Doctor\ProduceMedicineSpecialization.cs" />
     <Compile Include="Framework\Specialization.cs" />
+    <Compile Include="Framework\Farmer\TendToFieldsSpecialization.cs" />
+    <Compile Include="Framework\Doctor\TendToPatientsSpecialization.cs" />
+    <Compile Include="Framework\SpecializationDescriptors.cs" />
+    <Compile Include="Framework\SubSpecialization.cs" />
+    <Compile Include="Patches\ForesterPatch.cs" />
     <Compile Include="Patches\InteractableBookKeeperHelper.cs" />
     <Compile Include="Framework\InteractionRestrictions.cs" />
+    <Compile Include="Patches\InteractionLockPatch.cs" />
     <Compile Include="Patches\MaxPriorityPatch.cs" />
+    <Compile Include="Patches\NewSpecializationsPatch.cs" />
     <Compile Include="Patches\ProfessionDetailPanelPatch.cs" />
     <Compile Include="Patches\SearchInteractablesPatch.cs" />
+    <Compile Include="Patches\YieldMicroInteractionPatch.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Components\SpecializationDetailsPanel.cs" />
     <Compile Include="Components\SpecializationPanel.cs" />
     <Compile Include="Patches\WorkInteractionControllerPatch.cs" />
     <Compile Include="Patches\TendToFieldsPatches.cs" />
-    <Compile Include="Patches\YieldMicroInteractionHelper.cs" />
+    <Compile Include="Framework\YieldMicroInteractionHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="config.json">

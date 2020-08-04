@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
+using WitchyMods.AbsoluteProfessionPriorities.Framework;
 
 namespace WitchyMods.AbsoluteProfessionPriorities {
     /// <summary>

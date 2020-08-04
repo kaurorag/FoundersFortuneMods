@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
+using WitchyMods.AbsoluteProfessionPriorities.Framework;
 
 namespace WitchyMods.AbsoluteProfessionPriorities {
     /// <summary>
@@ -22,6 +23,7 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
         public OrderableToggle SubSpecializationToggleTemplate;
         public Toggle AutoPriorityToggle;
         public Text AutoPriorityText;
+        public InputField DistanceInput;
 
 #if !MODKIT
         private HumanAI human;
@@ -34,9 +36,6 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
         private Dictionary<string, OrderableToggle> SubSpecToggles = new Dictionary<string, OrderableToggle>();
 
         private bool inInit = false;
-#endif
-
-#if !MODKIT
 
         public void Init(SpecializationPanel parent, SpecializationDescriptor spec, int maxValue) {
             this.ParentPanel = parent;
@@ -86,6 +85,7 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
             this.SubExpandButton.onClick.AddListener(SpecializationToggle_ExpandButtonClicked);
 
             this.AutoPriorityToggle.onValueChanged.AddListener(this.AutoManageToggle_ValueChanged);
+            this.DistanceInput.onValueChanged.AddListener((x) => this.DistanceInput_ValueChanged());
         }
 
         public void InitForHuman(HumanAI human) {
@@ -105,6 +105,7 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
             this.UpdateOrderButtonsState();
 
             this.AutoPriorityToggle.isOn = this.Specialization.AutoManageSubSpecializations;
+            this.DistanceInput.text = this.Specialization.MaxDistance.ToString();
             inInit = false;
         }
 
@@ -113,6 +114,14 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
 
             this.Specialization.AutoManageSubSpecializations = this.AutoPriorityToggle.isOn;
             this.UpdateOrderButtonsState();
+        }
+
+        private void DistanceInput_ValueChanged() {
+            if (inInit) return;
+            this.Specialization.MaxDistance = (float)Convert.ToInt32( this.DistanceInput.text);
+            inInit = true;
+            this.DistanceInput.text = this.Specialization.MaxDistance.ToString();
+            inInit = false;
         }
 
         private void SpecializationToggle_InputValueChanged() {

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using WitchyMods.AbsoluteProfessionPriorities.Framework;
 
 namespace WitchyMods.AbsoluteProfessionPriorities {
     [Serializable]
@@ -143,6 +144,7 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
                         case "produceMedicine":
                         case "chopTrees":
                         case "growTrees":
+                        case "performResearch":
                             descriptors[profession][spec.name].CanAutoManageSubSpecializations = true;
                             break;
 

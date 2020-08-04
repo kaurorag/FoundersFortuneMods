@@ -2,6 +2,12 @@
   "-1": {
     "english": "Tend to fields"
   },
+  "AutoManagePriority": {
+    "english": "Auto Priority"
+  },
+  "MaxDistance": {
+    "english": "Max Distance"
+  },
   "professionSpecialization_buildFields": {
     "english": "Build Fields"
   },
@@ -97,5 +103,8 @@
   },
   "Specialization_Doctor_produceMedicine_AutoManageTooltip": {
     "english": "Will order potions types by their Owned Count / Max Storage ratio."
+  },
+  "Specialization_Scholar_performResearch_AutoManageTooltip": {
+    "english": "Will select the closest research station."
   }
 }

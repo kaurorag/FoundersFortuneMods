@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using FFModUtils.Extensions;
 using HarmonyLib;
 using UnityEngine;
+using WitchyMods.AbsoluteProfessionPriorities.Framework;
 
 namespace WitchyMods.AbsoluteProfessionPriorities.Patches {
     [HarmonyPatch(typeof(HumanAI))]
@@ -15,9 +16,6 @@ namespace WitchyMods.AbsoluteProfessionPriorities.Patches {
         [HarmonyPrefix]
         public static bool SearchForInteractableWithInteraction_Prefix(HumanAI __instance, ref Interactable __result, Interaction interaction, float distance, List<InteractionRestriction> restrictions = null, bool probablyReachablesOnly = false, bool objectInteraction = false, Vector3 positionOverride = default(Vector3)) {
             switch (interaction) {
-                case YieldMicroInteractionHelper.TendToFieldsInteraction:
-                    __result = SearchInteractablesHelper.GetNextTendToFieldsInteractable(__instance, restrictions);
-                    break;
                 case Interaction.Construct:
                     __result = __instance.SearchForInteractbleWithConstructPriority(interaction, distance, restrictions, probablyReachablesOnly, objectInteraction, positionOverride);
                     break;
@@ -69,24 +67,6 @@ namespace WitchyMods.AbsoluteProfessionPriorities.Patches {
         public static bool SearchForInteractablesWithInteraction_Prefix(HumanAI __instance, ref IEnumerable<Interactable> __result, Interaction interaction, float distance, List<InteractionRestriction> restrictions = null, bool probablyReachablesOnly = false, bool objectInteraction = false, Vector3 positionOverride = default(Vector3)) {
             __result = InteractableBookkeeperHelper.SearchForInteractablesWithInteraction(__instance, interaction, distance, restrictions, probablyReachablesOnly, objectInteraction, positionOverride);
             return false;
-        }
-    }
-
-    public static class SearchInteractablesHelper {
-        public static Interactable GetNextTendToFieldsInteractable(HumanAI human, List<InteractionRestriction> restrictions) {
-            foreach (var interactable in InteractableBookkeeperHelper.SearchForInteractablesWithInteraction(
-                human, YieldMicroInteractionHelper.TendToFieldsInteraction, -1, restrictions, true)) {
-
-                if (!interactable.IsValid() || !interactable.GetPrimaryHolder<Furniture>().IsBuilt()) continue;
-
-                SoilModule soil = interactable.GetPrimaryHolder<Furniture>().GetModule<SoilModule>();
-                if (soil.GetInteractions(human, true, false)
-                    .Any(x => !x.interaction.In(Interaction.RemovePlant, Interaction.RemoveInfestedPlants, YieldMicroInteractionHelper.TendToFieldsInteraction) &&
-                             !x.IsRestricted(interactable, human, true)))
-                    return interactable;
-            }
-
-            return null;
         }
     }
 }

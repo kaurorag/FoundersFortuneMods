@@ -1,9 +1,11 @@
-﻿using HarmonyLib;
+﻿using FFModUtils;
+using HarmonyLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UnityEngine;
 
 namespace WitchyMods.AbsoluteProfessionPriorities {
     [Serializable]
@@ -24,6 +26,14 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
             }
 
             return false;
+        }
+    }
+
+    [Serializable]
+    public class InteractionRestrictionEmptyGraveCooldown : InteractionRestriction {
+        public override bool IsRestricted(Interactable interactable, Interaction interaction, HumanAI actor, bool issuedByAI, out string reason) {
+            reason = "";
+            return AbsoluteProfessionPrioritiesMod.Instance.buryColonistFailCooldown.HasValue;
         }
     }
 
@@ -92,6 +102,121 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
             Furniture furniture = ((FurnitureInteractable)interactable).GetFurniture();
 
             return furniture.HasModule<SoilModule>();
+        }
+    }
+
+    [System.Serializable]
+    public class InteractionRestrictionWoodStockpile : InteractionRestriction {
+
+        public InteractionRestrictionWoodStockpile() { }
+
+        public override bool IsRestricted(Interactable interactable, Interaction interaction, HumanAI actor, bool issuedByAI, out string reason) {
+            reason = "";
+
+            if (interactable == null || !interactable.IsValid() || !(interactable is FurnitureInteractable)) return true;
+            ResourceModule rm = interactable.GetPrimaryHolder<Furniture>().GetModule<ResourceModule>();
+            if (rm == null) return true;
+
+            if (rm.GetResource() != Resource.Wood) return true;
+            if (rm.resourcesPerRound == 0) return false;
+
+            Resource aggResource;
+            bool stockpileFull = !FurnitureFactory.StockpilesHaveSpace(Resource.Wood, null, out aggResource);
+            if (stockpileFull) {
+                reason = Helper.SubstituteCode(("stockpileIsFull"), "resource", GameState.GetDisplayNameOfResource(aggResource));
+            } else {
+                reason = "";
+            }
+            return stockpileFull;
+        }
+    }
+
+    [Serializable]
+    public class InteractionRestrictionResourcePerRound : InteractionRestriction {
+        public int[] AllowedAmounts;
+        public int[] ForbiddenAmmounts;
+
+        public InteractionRestrictionResourcePerRound(int[] allowedAmounts = null, int[] forbiddenAmounts= null) {
+            this.AllowedAmounts = allowedAmounts == null ? new int[] { } : allowedAmounts;
+            this.ForbiddenAmmounts = forbiddenAmounts == null ? new int[] { } : forbiddenAmounts;
+        }
+
+        public override bool IsRestricted(Interactable interactable, Interaction interaction, HumanAI actor, bool issuedByAI, out string reason) {
+            reason = "";
+
+            if (interaction != Interaction.GatherResource) return true;
+            if (interactable == null || !interactable.IsValid() || !(interactable is FurnitureInteractable)) return true;
+
+            ResourceModule rm = interactable.GetPrimaryHolder<Furniture>().GetModule<ResourceModule>();
+            if (rm == null) return true;
+
+            if (rm.isDepleted) return true;
+            if (this.AllowedAmounts.Length != 0 && !this.AllowedAmounts.Contains(rm.resourcesPerRound)) return true;
+            if (this.ForbiddenAmmounts.Length != 0 && this.ForbiddenAmmounts.Contains(rm.resourcesPerRound)) return true;
+
+            return false;
+        }
+    }
+
+    [Serializable]
+    public class InteractionRestrictionGrowingSpotFilter : InteractionRestriction {
+        public string[] RequiredSkillsFilter;
+
+        public InteractionRestrictionGrowingSpotFilter(params string[] filter) {
+            this.RequiredSkillsFilter = filter;
+        }
+
+        public override bool IsRestricted(Interactable interactable, Interaction interaction, HumanAI actor, bool issuedByAI, out string reason) {
+            reason = "";
+            if (interactable == null || !interactable.IsValid() || !(interactable is FurnitureInteractable)) return true;
+            Furniture furniture = interactable.GetPrimaryHolder<Furniture>();
+            GrowingSpotModule module = furniture.GetModule<GrowingSpotModule>();
+            if (module == null) return true;
+            return !this.RequiredSkillsFilter.Contains(module.requiredSkill);
+        }
+    }
+
+    [Serializable]
+    public class InteractionRestrictionCareForTrees : InteractionRestriction {
+        public string RequiredSkill;
+        public float AllowedTime;
+
+        public InteractionRestrictionCareForTrees(string requiredSkill, float time) {
+            this.RequiredSkill = requiredSkill;
+            this.AllowedTime = time;
+        }
+
+        public override bool IsRestricted(Interactable interactable, Interaction interaction, HumanAI actor, bool issuedByAI, out string reason) {
+            reason = "";
+            if (interactable == null || !interactable.IsValid() || !(interactable is FurnitureInteractable)) return true;
+            Furniture furniture = interactable.GetPrimaryHolder<Furniture>();
+            GrowingSpotModule module = furniture.GetModule<GrowingSpotModule>();
+            if (module == null) return true;
+
+            if (!actor.professionManager.HasSkill(this.RequiredSkill)) return true;
+            if(module.GetFieldValue<int>("currentPhase") >= 0) {
+                float timeDiff = this.AllowedTime - Time.time;
+                return timeDiff > 0;
+            }
+            return false;
+        }
+    }
+
+    [Serializable]
+    public class InteractionRestrictionNameKey : InteractionRestriction {
+        public string[] InteractioNameKey;
+
+        public InteractionRestrictionNameKey(params string[] interactionNameKey) {
+            this.InteractioNameKey = interactionNameKey;
+        }
+
+        public override bool IsRestricted(Interactable interactable, Interaction interaction, HumanAI actor, bool issuedByAI, out string reason) {
+            reason = "";
+            if (interactable == null || !interactable.IsValid() || !(interactable is FurnitureInteractable)) return true;
+            Furniture furniture = interactable.GetPrimaryHolder<Furniture>();
+            ProductionModule module = furniture.GetModule<ProductionModule>();
+            if (module == null) return true;
+            return !this.InteractioNameKey.Contains(module.interactionNameKey);
         }
     }
 }

@@ -4,14 +4,15 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using FFModUtils;
 using HarmonyLib;
 using UnityEngine;
+using WitchyMods.AbsoluteProfessionPriorities.Framework;
 
-namespace WitchyMods.AbsoluteProfessionPriorities {
+namespace WitchyMods.AbsoluteProfessionPriorities.Framework {
     public class YieldMicroInteractionHelper {
-        private YieldMicroInteraction y = null;
 
-        public const Interaction TendToFieldsInteraction = (Interaction)(-1);
+        private YieldMicroInteraction y = null;
 
         public YieldMicroInteractionHelper(YieldMicroInteraction instance) {
             y = instance;
@@ -134,6 +135,118 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
         }
 
         //Custom
+        public IEnumerable<YieldResult> StartGetInteractionEnumerable(Interaction interaction) {
+            if (ShouldLockTarget(interaction)) {
+                yield return New_LockInteraction(true);
+            }
+   
+            //Only interactions created by this mod have a InteractionMaxDistanceData so we know it's ours
+            if (this.InteractionInfo.data != null && this.InteractionInfo.data is InteractionMaxDistanceData) {
+                float distance = ((InteractionMaxDistanceData)this.InteractionInfo.data).MaxDistance;
+
+                switch (interaction) {
+                    case Specialization.TendToFieldsInteraction:
+                        foreach (var x in ContinueInteraction(New_TendToFields(), distance)) yield return x; break;
+                    case Specialization.SowAndCareForTrees:
+                        foreach (var x in ContinueInteraction(New_SowAndCareForTrees(), distance)) yield return x; break;
+                    case Interaction.Sow:
+                        foreach (var x in New_Sow()) yield return x; break;
+                    case Specialization.ChopTrees:
+                    case Interaction.GatherResource:
+                    case Interaction.ClearStumps:
+                        foreach (var x in DoOnceForSubTask(WorkOnFurniture(), distance)) yield return x; break;
+                    case Interaction.WaterPlant:
+                        foreach (var x in New_WaterPlantCustom()) yield return x; break;
+                }
+            }
+        }
+
+        private IEnumerable<YieldResult> DoOnceForSubTask(IEnumerable<YieldResult> task, float distance) {
+            if (InteractionInfo.isContinuationOrSubtask)
+                foreach (var x in task) yield return x;
+            else
+                foreach (var x in ContinueInteraction(task, distance)) yield return x;
+        }
+
+        private bool ShouldLockTarget(Interaction interaction) {
+            switch (interaction) {
+                case Interaction.EatAtChair:
+                case Interaction.DrinkBeerAtChair:
+                case Interaction.TryFluTreatment:
+                case Interaction.SplintArm:
+                case Interaction.SplintLeg:
+                case Interaction.BandageWounds:
+                case Interaction.Sow:
+                case Interaction.Construct:
+                case Interaction.GatherResource:
+                case Interaction.LearnCrafting:
+                case Interaction.LearnFarming:
+                case Interaction.LearnFighting:
+                case Interaction.LearnForesting:
+                case Interaction.LearnLifeSkills:
+                case Interaction.LearnMedicine:
+                case Interaction.LearnMining:
+                case Interaction.LearnResearching:
+                case Interaction.WaterPlant:
+                case Interaction.CarryToBed:
+                case Interaction.Bury:
+                case Interaction.Sit:
+                case Interaction.Sleep:
+                case Interaction.SleepUntilHealthy:
+                case Interaction.LockUp:
+                case Interaction.Remove:
+                case Interaction.Deconstruct:
+                case Interaction.Produce:
+                case Interaction.ProcessResource:
+                case Interaction.RemovePlant:
+                case Interaction.RemoveDeadPlants:
+                case Interaction.WorkOnMasterpiece:
+                case Interaction.RemoveInfestedPlants:
+                case Interaction.ClearStumps:
+                case Interaction.GiveFood:
+                case Interaction.GiveHealingPotion:
+                case Interaction.Care:
+                case Interaction.Tame:
+                case Interaction.Shear:
+                case Interaction.Butcher:
+                case Interaction.Milk:
+                    return true;
+            }
+
+            return false;
+        }
+
+        public YieldResult New_LockInteraction(bool fromMod) {
+            if (InteractionTarget.interactionLockID != 0 && Math.Abs(InteractionTarget.interactionLockID) != human.GetID() && InteractionTarget != human.GetInteractable()) {
+                if (!fromMod && InteractionTarget.interactionLockID < 0)
+                    return YieldResult.Continue;
+                else
+                    return YieldResult.Failed;
+            }
+            InteractionTarget.SetInteractionLockID(human.GetID());
+            return YieldResult.Continue;
+        }
+
+        public IEnumerable<YieldResult> New_SowAndCareForTrees() {
+            GrowingSpotModule module = this.InteractionTarget.GetPrimaryHolder<Furniture>().GetModule<GrowingSpotModule>();
+            if(module.GetFieldValue<int>("currentPhase") < 0) {
+                subTask = new YieldMicroInteraction(new InteractionInfo(Interaction.Sow,
+                    this.InteractionTarget, this.InteractionInfo.restrictions, this.InteractionInfo.issuedByAI,
+                    this.InteractionInfo.priority, this.InteractionInfo.urgent,
+                    this.InteractionInfo.shouldBeFinished, true), this.human);
+            } else {
+                subTask = new YieldMicroInteraction(new InteractionInfo(Interaction.Care,
+                    this.InteractionTarget, this.InteractionInfo.restrictions, this.InteractionInfo.issuedByAI,
+                    this.InteractionInfo.priority, this.InteractionInfo.urgent,
+                    this.InteractionInfo.shouldBeFinished, true), this.human);
+            }
+
+            subTask = subTask.Handle();
+            yield return YieldResult.WaitFrame;
+            StopCurrentSubtask();
+            yield return YieldResult.Completed;
+        }
+
         public IEnumerable<YieldResult> New_TendToFields() {
             Furniture furniture = InteractionTarget.GetPrimaryHolder<Furniture>();
             SoilModule soilModule = furniture.GetModule<SoilModule>();
@@ -141,7 +254,7 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
             foreach (var interaction in soilModule.GetInteractions(human, InteractionInfo.issuedByAI, false)) {
                 if (interaction.interaction == Interaction.RemoveInfestedPlants ||
                     interaction.interaction == Interaction.RemovePlant ||
-                    interaction.interaction == TendToFieldsInteraction)
+                    interaction.interaction == Specialization.TendToFieldsInteraction)
                     continue;
 
                 if (interaction.interaction == Interaction.WaterPlant) {
@@ -196,26 +309,6 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
             yield return YieldResult.Completed;
         }
 
-        public IEnumerable<YieldResult> New_Butcher() {
-            foreach (var x in LockAnimal()) yield return x;
-            foreach (var x in Butcher()) yield return x;
-        }
-
-        public IEnumerable<YieldResult> New_Milk() {
-            foreach (var x in LockAnimal()) yield return x;
-            foreach (var x in Milk()) yield return x;
-        }
-
-        public IEnumerable<YieldResult> New_Shear() {
-            foreach (var x in LockAnimal()) yield return x;
-            foreach (var x in Shear()) yield return x;
-        }
-
-        public IEnumerable<YieldResult> New_Tame() {
-            foreach (var x in LockAnimal()) yield return x;
-            foreach (var x in Tame()) yield return x;
-        }
-
         private IEnumerable<YieldResult> New_Sow() {
             foreach (var x in Walk(InteractionTarget, 0.02f)) { yield return x; }
             yield return LockInteraction();
@@ -226,29 +319,6 @@ namespace WitchyMods.AbsoluteProfessionPriorities {
             foreach (var x in Wait(plantingTime)) { yield return x; }
             yield return Interact();
             yield return YieldResult.Completed;
-        }
-
-        public IEnumerable<YieldResult> StartGetInteractionEnumerable(Interaction interaction) {
-
-            switch (interaction) {
-                case TendToFieldsInteraction: return ContinueInteraction(New_TendToFields(), -1);
-                case Interaction.Sow: return New_Sow();
-                case Interaction.ClearStumps:
-                case Interaction.GatherResource: if (InteractionInfo.isContinuationOrSubtask) return WorkOnFurniture(); else return ContinueInteraction(WorkOnFurniture(), -1);
-                case Interaction.WaterPlant: return New_WaterPlantCustom();
-                case Interaction.Tame: return New_Tame();
-                case Interaction.Butcher: return New_Butcher();
-                case Interaction.Shear: return New_Shear();
-                case Interaction.Milk: return New_Milk();
-            }
-
-            return null;
-        }
-
-        private IEnumerable<YieldResult> LockAnimal() {
-            HumanAI partner = InteractionTarget.GetPrimaryHolder<HumanAI>();
-            if (partner.animal != null)
-                yield return LockInteraction();
         }
 
         public YieldMicroInteraction New_Handle() {
