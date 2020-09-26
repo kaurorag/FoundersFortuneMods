@@ -1,62 +1,82 @@
 ﻿{
   "witchy_UIImprovements_satisfactionTooltip_Title": {
-    "english": "Satisfaction"
+    "english": "Satisfaction",
+	"french" : "Satisfaction"
   },
   "witchy_UIImprovements_satisfactionTooltip_Desc": {
-    "english": "{0} has {1} Satisfaction points to spend."
+    "english": "{0} has {1} Satisfaction points to spend.",
+	"french" : "{0} a {1} points de Satisfaction à dépenser."
   },
   "witchy_UIImprovements_MigrationTimer": {
-    "english": "New colonist will arrive in {0}:{1:00}"
+    "english": "New colonist will arrive in {0}:{1:00}",
+	"french" : "Un nouveau colon arrive dans {0}:{1:00}"
   },
   "witchy_UIImprovements_Soil_Watered": {
-    "english": "Watered: {0}/2"
+    "english": "Watered: {0}/2",
+	"french" : "Arrosé: {0}/2"
   },
   "witchy_UIImprovements_Soil_Stage": {
-    "english": "Growth stage: {0}"
+    "english": "Growth stage: {0}",
+	"french" : "Etape de croissance: {0}"
   },
   "witchy_UIImprovements_Soil_Stage_NoPlant": {
-    "english": "Need to sow"
+    "english": "Need to sow",
+	"french" : "Il faut semer"
   },
   "witchy_UIImprovements_Soil_Stage_Growing": {
-    "english": "Growing"
+    "english": "Growing",
+	"french" : "En croissance"
   },
   "witchy_UIImprovements_Soil_Stage_Grown": {
-    "english": "Ready for harvest"
+    "english": "Ready for harvest",
+	"french" : "Prêt à la récolte"
   },
   "witchy_UIImprovements_Soil_Stage_Dead": {
-    "english": "Dead"
+    "english": "Dead",
+	"french" : "Mort"
   },
   "witchy_UIImprovements_Soil_Growth": {
-    "english": "Growth: {0} {1}%"
+    "english": "Growth: {0} {1}%",
+	"french" : "Croissance: {0} {1}%"
   },
   "witchy_UIImprovements_Resource_Depleted": {
-    "english": "Depleted"
+    "english": "Depleted",
+	"french" : "Epuisé"
   },
   "witchy_UIImprovements_Resource_ReplenishTime": {
-    "english": "Ready in {0:00}:{1:00}"
+    "english": "Ready in {0:00}:{1:00}",
+	"french" : "Prêt dans {0:00}:{1:00}"
   },
   "witchy_UIImprovements_Resource_Rounds": {
-    "english": "Remaining rounds: {0}"
+    "english": "Remaining rounds: {0}",
+	"french" : "Récolte restantes: {0}"
   },
   "witchy_UIImprovements_Resource_ResPerRound": {
-    "english": "Nb resources per round: {0}"
+    "english": "Nb resources per round: {0}",
+	"french" : "Nb ressources par récolte: {0}"
   },
   "witchy_UIImprovements_Resource_RemainingRes": {
-    "english": "Nb resources remaining: {0}"
+    "english": "Nb resources remaining: {0}",
+	"french" : "Nb ressources restantes: {0}"
   },
   "witchy_UIImprovements_Enemy_Faction": {
-    "english": "Faction name: {0}"
+    "english": "Faction name: {0}",
+	"french" : "Nom de Faction: {0} {0}"
   },
   "witchy_UIImprovements_GrowingSpot_Phases": {
-    "english": "Phase: {0}/{1}"
+    "english": "Phase: {0}/{1}",
+	"french": "Phase: {0}/{1}"
   },
   "witchy_UIImprovements_GrowingSpot_NextPhase": {
-    "english": "Time until next phase: {0:00}:{1:00}"
+    "english": "Time until next phase: {0:00}:{1:00}",
+	"french": "Temps avant phase suivante: {0:00}:{1:00}"
   },
   "witchy_UIImprovements_GrowingSpot_NextCare": {
-    "english": "Time until next care: {0:00}:{1:00}"
+    "english": "Time until next care: {0:00}:{1:00}",
+	"french": "Temps avant les prochains soins: {0:00}:{1:00}"
   },
   "day": {
-    "english": "Day"
-  }
+    "english": "Day",
+	"french": "Jour"
+	}
 }
